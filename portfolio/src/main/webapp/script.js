@@ -13,11 +13,30 @@
 // limitations under the License.
 
 /**
- *  Gets a message from the server and add it to the page.
+ *  Gets the comments from the server and adds them to the page.
  */
 
-async function getMessage() {
+async function getComments() {
     const response = await fetch('/data');
-    const message = await response.text();
-    document.getElementById('message-container').innerHTML = message;
+    const comments = await response.json();
+
+	console.log(comments);
+
+	const commentsList = document.getElementById('comments-container');
+
+	commentsList.innerHTML = '';
+
+	comments.forEach(comment => {
+		commentsList.appendChild(createListElement(comment));
+    });
+}
+
+/**
+ *	Creates an <li> element containing text.
+ */
+ 
+function createListElement(text) {
+  	const liElement = document.createElement('li');
+	liElement.innerText = text;
+  	return liElement;
 }
