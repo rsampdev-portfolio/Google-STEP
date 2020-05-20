@@ -13,7 +13,7 @@
 // limitations under the License.
 
 /**
- *  Get a message from the server and add it to the page.
+ *  Gets a message from the server and add it to the page.
  */
 
 async function getMessage() {
