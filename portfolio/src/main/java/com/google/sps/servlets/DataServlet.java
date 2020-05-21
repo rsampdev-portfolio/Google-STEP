@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import java.util.List;
+import java.time.Instant;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.google.gson.Gson;
@@ -38,24 +39,22 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
-	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+	private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	@Override
   	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ArrayList<Comment> comments = new ArrayList<Comment>();
+		List<Comment> comments = new ArrayList<>();
 		
 		Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
 		PreparedQuery results = datastore.prepare(query);
-
-		Comment comment;
 
 		for (Entity entity : results.asIterable()) {
 			long id = entity.getKey().getId();
       		String name = (String) entity.getProperty("name");
       		String text = (String) entity.getProperty("text");
-			long time = (long) entity.getProperty("time");
+			Instant time = Instant.parse((String) entity.getProperty("time"));
 
-			comment = new Comment(id, name, text, time);
+			Comment comment = new Comment(id, name, text, time);
 			comments.add(comment);
 		}
 
@@ -69,7 +68,7 @@ public class DataServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String name = request.getParameter("comment-name");
 		String text = request.getParameter("comment-text");
-		long time = System.currentTimeMillis();
+		Instant time = Instant.now();
 
         Entity commentEntity = new Entity("Comment");
         commentEntity.setProperty("name", name);
@@ -81,7 +80,7 @@ public class DataServlet extends HttpServlet {
 		response.sendRedirect("/index.html");
 	}
 
-    private String convertToJSON(ArrayList<Comment> comments) {
+    private String convertToJSON(List<Comment> comments) {
         Gson gson = new Gson();
 		Type type = new TypeToken<List<Comment>>(){}.getType();
     	String json = gson.toJson(comments, type);
