@@ -22,7 +22,25 @@ function addRandomGreeting() {
   // Pick a random greeting.
   const greeting = greetings[Math.floor(Math.random() * greetings.length)];
 
-  // Add it to the page.
-  const greetingContainer = document.getElementById('greeting-container');
-  greetingContainer.innerText = greeting;
+	console.log(comments);
+
+	const commentsList = document.getElementById('comments-container');
+
+	commentsList.innerHTML = '';
+
+	comments.forEach(comment => {
+		const content = `[${comment.name}]: ${comment.text}`;
+
+		commentsList.appendChild(createListElement(content));
+    });
+}
+
+/**
+ *	Creates an <li> element containing text.
+ */
+ 
+function createListElement(text) {
+  	const liElement = document.createElement('li');
+	liElement.innerText = text;
+  	return liElement;
 }
