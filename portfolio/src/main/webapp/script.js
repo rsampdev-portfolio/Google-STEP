@@ -27,7 +27,9 @@ async function getComments() {
 	commentsList.innerHTML = '';
 
 	comments.forEach(comment => {
-		commentsList.appendChild(createListElement(comment));
+		const content = "[" + comment.name + "]: " + comment.text;
+
+		commentsList.appendChild(createListElement(content));
     });
 }
 
