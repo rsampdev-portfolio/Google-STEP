@@ -25,8 +25,11 @@ import com.google.gson.reflect.TypeToken;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
@@ -35,15 +38,28 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
-	private ArrayList<Comment> comments = new ArrayList<Comment>();
-
-	// comments.add("Wow! Your portfolio is super cool.");
-	// comments.add("Neat! I have six siblings as well.");
-	// comments.add("Awesome! We go to the same school.");
+	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
 	@Override
   	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String json = convertToJson(comments);
+		ArrayList<Comment> comments = new ArrayList<Comment>();
+		
+		Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
+		PreparedQuery results = datastore.prepare(query);
+
+		Comment comment;
+
+		for (Entity entity : results.asIterable()) {
+			long id = entity.getKey().getId();
+      		String name = (String) entity.getProperty("name");
+      		String text = (String) entity.getProperty("text");
+			long time = (long) entity.getProperty("time");
+
+			comment = new Comment(id, name, text, time);
+			comments.add(comment);
+		}
+
+		String json = convertToJSON(comments);
 
     	response.setContentType("application/json;");
     	response.getWriter().println(json);
@@ -53,31 +69,19 @@ public class DataServlet extends HttpServlet {
 	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
 		String name = request.getParameter("comment-name");
 		String text = request.getParameter("comment-text");
+		long time = System.currentTimeMillis();
 
         Entity commentEntity = new Entity("Comment");
         commentEntity.setProperty("name", name);
         commentEntity.setProperty("text", text);
+        commentEntity.setProperty("time", time);
 
-        DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
         datastore.put(commentEntity);
-
-		addComment(name, text);
 
 		response.sendRedirect("/index.html");
 	}
 
-	public void addComment(String name, String text) {
-        int id = 0;
-
-        if (comments.size() > 0) {
-            id = comments.get(0).getID() + 1;
-        }
-
-        Comment comment = new Comment(id, name, text);
-        comments.add(0, comment);
-    }
-
-    private String convertToJson(ArrayList<Comment> comments) {
+    private String convertToJSON(ArrayList<Comment> comments) {
         Gson gson = new Gson();
 		Type type = new TypeToken<List<Comment>>(){}.getType();
     	String json = gson.toJson(comments, type);

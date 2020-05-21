@@ -5,17 +5,19 @@ package com.google.sps.data;
  */
 
 public class Comment {
-    private int id;
+    private long id;
     private String name;
     private String text;
+    private long time;
 
-    public Comment(int id, String name, String text) {
+    public Comment(long id, String name, String text, long time) {
         this.id = id;
     	this.name = name;
         this.text = text;
+        this.time = time;
     }
 
-    public int getID() {
+    public long getID() {
         return this.id;
     }
 
@@ -35,8 +37,16 @@ public class Comment {
         this.text = text;
     }
 
+    public long getTime() {
+        return this.time;
+    }
+
+    public void setText(long time) {
+        this.time = time;
+    }
+
     @Override
 	public String toString() {
-        return "Comment [id=" + id + ", name=" + name + ", text=" + text +"]";
+        return "Comment [id=" + id + ", name=" + name + ", text=" + text +", time=" + time + "]";
     }
 }
