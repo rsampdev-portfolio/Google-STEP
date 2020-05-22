@@ -49,12 +49,7 @@ public class DataServlet extends HttpServlet {
         PreparedQuery results = datastore.prepare(query);
 
         for (Entity entity : results.asIterable()) {
-            long id = entity.getKey().getId();
-            String name = (String) entity.getProperty("name");
-            String text = (String) entity.getProperty("text");
-            Instant time = Instant.parse((String) entity.getProperty("time"));
-
-            Comment comment = new Comment(id, name, text, time);
+            Comment comment = Comment.fromDatastoreEntity(entity);
             comments.add(comment);
         }
 
@@ -62,7 +57,7 @@ public class DataServlet extends HttpServlet {
 
         response.setContentType("application/json;");
         response.getWriter().println(json);
-      }
+    }
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -70,10 +65,8 @@ public class DataServlet extends HttpServlet {
         String text = request.getParameter("comment-text");
         Instant time = Instant.now();
 
-        Entity commentEntity = new Entity("Comment");
-        commentEntity.setProperty("name", name);
-        commentEntity.setProperty("text", text);
-        commentEntity.setProperty("time", time);
+        Comment comment = new Comment(name, text, time);
+        Entity commentEntity = comment.toDatastoreEntity();
 
         datastore.put(commentEntity);
 
@@ -85,6 +78,6 @@ public class DataServlet extends HttpServlet {
         Type type = new TypeToken<List<Comment>>(){}.getType();
         String json = gson.toJson(comments, type);
         return json;
-      }
+    }
 
 }
