@@ -40,6 +40,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 public class DataServlet extends HttpServlet {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    private int maxNumberOfComments = 20;
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -48,9 +49,15 @@ public class DataServlet extends HttpServlet {
         Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
         PreparedQuery results = datastore.prepare(query);
 
+        int numberOfComments = 0;
+
         for (Entity entity : results.asIterable()) {
             Comment comment = Comment.fromDatastoreEntity(entity);
-            comments.add(comment);
+
+            if (numberOfComments < maxNumberOfComments) {
+                comments.add(comment);
+                numberOfComments++;
+            }
         }
 
         String json = convertToJSON(comments);
