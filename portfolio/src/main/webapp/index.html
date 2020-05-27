@@ -97,7 +97,6 @@
             <br>
             <label>Max Number of Comments: </label>
             <br>
-            <br>
             <input type="number" id="max-comments" name="max-comments" min="1" onchange="getComments();" placeholder="20">
             <br>
 
@@ -107,6 +106,8 @@
                 getComments();
             </script>
 
+            <input type="submit" value="Delete All Comments" onclick="deleteComments();">
+            
         </div>
     </body>
 </html>

@@ -34,7 +34,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
- *    Servlet that handles comment data.
+ *    Servlet that handles creating and also returning comment data.
  */
 
 @WebServlet("/data")

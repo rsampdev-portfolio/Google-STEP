@@ -17,7 +17,7 @@
  */
 
 async function getComments() {
-    var servletURL = "/data"
+    var servletURL = "/data";
 
     var maxComments = document.getElementById("max-comments").value;
 
@@ -39,6 +39,20 @@ async function getComments() {
 
 		commentsList.appendChild(createListElement(content));
     });
+}
+
+/**
+ *  Deletes and removes all comments from the page.
+ */
+
+async function deleteComments() {
+    var servletURL = "/delete-data";
+
+    const response = await fetch(servletURL, {
+        method: "POST"
+    });
+
+    await getComments();
 }
 
 /**
