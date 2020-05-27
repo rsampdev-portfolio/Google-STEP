@@ -51,6 +51,11 @@ public class DataServlet extends HttpServlet {
 
         int numberOfComments = 0;
 
+        if (request.getParameter("max-comments") != null) {
+            String maxNumberOfCommentsString = request.getParameter("max-comments");
+            maxNumberOfComments = Integer.parseInt(maxNumberOfCommentsString);
+        }
+
         for (Entity entity : results.asIterable()) {
             Comment comment = Comment.fromDatastoreEntity(entity);
 

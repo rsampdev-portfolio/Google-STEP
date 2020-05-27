@@ -17,7 +17,9 @@
  */
 
 async function getComments() {
-    const response = await fetch('/data');
+    const servletURL = `/data?max-comments=5`;
+
+    const response = await fetch(servletURL);
     const comments = await response.json();
 
 	console.log(comments);
