@@ -6,7 +6,7 @@
         <link rel="stylesheet" href="style.css">
         <script src="script.js"></script>
     </head>
-    <body onload="getComments();">
+    <body>
         <div id="content">
 
             <h1>Sampson's Portfolio</h1>
@@ -98,10 +98,14 @@
             <label>Max Number of Comments: </label>
             <br>
             <br>
-            <input type="number" id="max-comments" name="max-comments" min="1">
+            <input type="number" id="max-comments" name="max-comments" min="1" onchange="getComments();" placeholder="20">
             <br>
 
             <ul id="comments-container"></ul>
+
+            <script>
+                getComments();
+            </script>
 
         </div>
     </body>
