@@ -36,6 +36,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 /**
  *    Servlet that handles comment data.
  */
+
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
