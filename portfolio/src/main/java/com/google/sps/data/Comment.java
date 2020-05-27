@@ -1,18 +1,5 @@
 package com.google.sps.data;
 
-<<<<<<< HEAD
-/**
- *  Class representing a comment with a commenter name and the comment's text.
- */
-
-public class Comment {
-    private long id;
-    private String name;
-    private String text;
-    private long time;
-
-    public Comment(long id, String name, String text, long time) {
-=======
 import java.time.Instant;
 import com.google.appengine.api.datastore.Entity;
 
@@ -37,7 +24,6 @@ public class Comment {
     }
 
     public Comment(long id, String name, String text, Instant time) {
->>>>>>> afe3671ada1695d30453873264f3a1609bd50f96
         this.id = id;
     	this.name = name;
         this.text = text;
@@ -64,16 +50,6 @@ public class Comment {
         this.text = text;
     }
 
-<<<<<<< HEAD
-    public long getTime() {
-        return this.time;
-    }
-
-    public void setText(long time) {
-        this.time = time;
-    }
-
-=======
     public Instant getTime() {
         return this.time;
     }
@@ -100,8 +76,7 @@ public class Comment {
 
         return comment;
     }
-
->>>>>>> afe3671ada1695d30453873264f3a1609bd50f96
+    
     @Override
 	public String toString() {
         return "Comment [id=" + id + ", name=" + name + ", text=" + text +", time=" + time + "]";
