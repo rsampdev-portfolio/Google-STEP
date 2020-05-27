@@ -14,9 +14,16 @@
 
 package com.google.sps.servlets;
 
+import java.util.List;
+import java.time.Instant;
 import java.io.IOException;
-import javax.servlet.annotation.WebServlet;
+import java.util.ArrayList;
+import com.google.gson.Gson;
+import java.lang.reflect.Type;
+import com.google.sps.data.Comment;
 import javax.servlet.http.HttpServlet;
+import com.google.gson.reflect.TypeToken;
+import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.datastore.Query;
@@ -26,67 +33,51 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
-/** Servlet that returns some example content. TODO: modify this file to handle comments data */
+/**
+ *    Servlet that handles comment data.
+ */
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
-<<<<<<< HEAD
-    
-	private ArrayList<Comment> comments = new ArrayList<Comment>();
 
-	// comments.add("Wow! Your portfolio is super cool.");
-	// comments.add("Neat! I have six siblings as well.");
-	// comments.add("Awesome! We go to the same school.");
-=======
+    private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
-	private DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
->>>>>>> Implement storing and retrieving comments with Datastore
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        List<Comment> comments = new ArrayList<>();
+        
+        Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
+        PreparedQuery results = datastore.prepare(query);
 
-	@Override
-  	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		ArrayList<Comment> comments = new ArrayList<Comment>();
-		
-		Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
-		PreparedQuery results = datastore.prepare(query);
+        for (Entity entity : results.asIterable()) {
+            Comment comment = Comment.fromDatastoreEntity(entity);
+            comments.add(comment);
+        }
 
-		Comment comment;
+        String json = convertToJSON(comments);
 
-		for (Entity entity : results.asIterable()) {
-			long id = entity.getKey().getId();
-      		String name = (String) entity.getProperty("name");
-      		String text = (String) entity.getProperty("text");
-			long time = (long) entity.getProperty("time");
+        response.setContentType("application/json;");
+        response.getWriter().println(json);
+    }
 
-			comment = new Comment(id, name, text, time);
-			comments.add(comment);
-		}
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String name = request.getParameter("comment-name");
+        String text = request.getParameter("comment-text");
+        Instant time = Instant.now();
 
-		String json = convertToJSON(comments);
-
-    	response.setContentType("application/json;");
-    	response.getWriter().println(json);
-  	}
-
-	@Override
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String name = request.getParameter("comment-name");
-		String text = request.getParameter("comment-text");
-		long time = System.currentTimeMillis();
-
-        Entity commentEntity = new Entity("Comment");
-        commentEntity.setProperty("name", name);
-        commentEntity.setProperty("text", text);
-        commentEntity.setProperty("time", time);
+        Comment comment = new Comment(name, text, time);
+        Entity commentEntity = comment.toDatastoreEntity();
 
         datastore.put(commentEntity);
 
-		response.sendRedirect("/index.html");
-	}
+        response.sendRedirect("/index.html");
+    }
 
-    private String convertToJSON(ArrayList<Comment> comments) {
+    private String convertToJSON(List<Comment> comments) {
         Gson gson = new Gson();
-		Type type = new TypeToken<List<Comment>>(){}.getType();
-    	String json = gson.toJson(comments, type);
-    	return json;
-  	}
-
+        Type type = new TypeToken<List<Comment>>(){}.getType();
+        String json = gson.toJson(comments, type);
+        return json;
+    }
+    
 }
