@@ -17,16 +17,22 @@
  */
 
 async function getComments() {
-    const servletURL = `/data?max-comments=5`;
+    var servletURL = "/data"
+
+    var maxComments = document.getElementById("max-comments").value;
+
+    if (maxComments != null && maxComments >= 1) {
+        servletURL = `/data?max-comments=${maxComments}`;
+    }
 
     const response = await fetch(servletURL);
     const comments = await response.json();
 
 	console.log(comments);
 
-	const commentsList = document.getElementById('comments-container');
+	const commentsList = document.getElementById("comments-container");
 
-	commentsList.innerHTML = '';
+	commentsList.innerHTML = "";
 
 	comments.forEach(comment => {
 		const content = `[${comment.name}]: ${comment.text}`;
@@ -40,7 +46,7 @@ async function getComments() {
  */
  
 function createListElement(text) {
-  	const liElement = document.createElement('li');
+  	const liElement = document.createElement("li");
 	liElement.innerText = text;
   	return liElement;
 }
