@@ -28,7 +28,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
@@ -41,6 +43,8 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 public class DataServlet extends HttpServlet {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    private UserService userService = UserServiceFactory.getUserService();
+    
     private int maxNumberOfComments = 20;
 
     @Override
@@ -76,9 +80,10 @@ public class DataServlet extends HttpServlet {
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("comment-name");
         String text = request.getParameter("comment-text");
+        String email = userService.getCurrentUser().getEmail();
         Instant time = Instant.now();
 
-        Comment comment = new Comment(name, text, time);
+        Comment comment = new Comment(name, email, text, time);
         Entity commentEntity = comment.toDatastoreEntity();
 
         datastore.put(commentEntity);

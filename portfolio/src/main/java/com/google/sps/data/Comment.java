@@ -14,24 +14,31 @@ import com.google.appengine.api.datastore.Entity;
 public class Comment {
     private long id = 0L;
     private String name;
+    private String email;
     private String text;
     private Instant time;
 
-    public Comment(String name, String text, Instant time) {
+    public Comment(String name, String email, String text, Instant time) {
     	this.name = name;
         this.text = text;
         this.time = time;
+        this.email = email;
     }
 
-    public Comment(long id, String name, String text, Instant time) {
+    public Comment(long id, String name, String email, String text, Instant time) {
         this.id = id;
     	this.name = name;
         this.text = text;
         this.time = time;
+        this.email = email;
     }
 
     public long getID() {
         return this.id;
+    }
+
+    public String getEmail() {
+        return this.email;
     }
 
     public String getName() {
@@ -61,6 +68,7 @@ public class Comment {
     public Entity toDatastoreEntity() {
         Entity commentEntity = new Entity("Comment");
         commentEntity.setProperty("name", name);
+        commentEntity.setProperty("email", email);
         commentEntity.setProperty("text", text);
         commentEntity.setProperty("time", time.toString());
         return commentEntity;
@@ -69,16 +77,17 @@ public class Comment {
     public static Comment fromDatastoreEntity(Entity entity) {
         Instant time = Instant.parse((String) entity.getProperty("time"));
         String name = (String) entity.getProperty("name");
+        String email = (String) entity.getProperty("email");
         String text = (String) entity.getProperty("text");
         long id = entity.getKey().getId();
 
-        Comment comment = new Comment(id, name, text, time);
+        Comment comment = new Comment(id, name, email, text, time);
 
         return comment;
     }
     
     @Override
 	public String toString() {
-        return "Comment [id=" + id + ", name=" + name + ", text=" + text +", time=" + time + "]";
+        return "Comment [id=" + id + ", name=" + name + ", email=" + email + "text=" + text +", time=" + time + "]";
     }
 }
