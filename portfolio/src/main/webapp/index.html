@@ -79,7 +79,7 @@
 
             <h3>Comment Section:</h3>
 
-            <form action="/data" method="POST">
+            <form id="comments-form" action="/data" method="POST">
                 <label>Name: </label>
                 <br>
                 <input type="text" name="comment-name">
@@ -94,6 +94,10 @@
                 <br>
             </form>
 
+            <script>
+                showCommentsForm();
+            </script>
+
             <br>
             <label>Max Number of Comments: </label>
             <br>
@@ -101,6 +105,7 @@
             <br>
 
             <ul id="comments-container"></ul>
+            <br>
 
             <script>
                 getComments();

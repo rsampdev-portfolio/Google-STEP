@@ -29,12 +29,16 @@ public class CheckLoginServlet extends HttpServlet {
             response.getWriter().println("<p>Logged In</p>");
             response.getWriter().println("<p>Email: " + userEmail + "</p>");
             response.getWriter().println("<p>Logout <a href=\"" + logoutUrl + "\">here</a></p>");
+
+            response.setHeader("loggedIn", "true");
         } else {
             String urlToRedirectToAfterUserLogsIn = "/";
             String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
 
             response.getWriter().println("<p>Not Logged In</p>");
             response.getWriter().println("<p>Login <a href=\"" + loginUrl + "\">here</a></p>");
+
+            response.setHeader("loggedIn", "false");
         }
     }
 

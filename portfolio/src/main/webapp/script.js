@@ -28,16 +28,14 @@ async function getComments() {
     const response = await fetch(servletURL);
     const comments = await response.json();
 
-	console.log(comments);
-
 	const commentsList = document.getElementById("comments-container");
 
 	commentsList.innerHTML = "";
 
-	comments.forEach(comment => {
+    comments.forEach(comment => {
 		const content = `[${comment.name}]: ${comment.text}`;
 
-		commentsList.appendChild(createListElement(content));
+    	commentsList.appendChild(createListElement(content));
     });
 }
 
@@ -48,11 +46,33 @@ async function getComments() {
 async function deleteComments() {
     var servletURL = "/delete-data";
 
-    const response = await fetch(servletURL, {
+    await fetch(servletURL, {
         method: "POST"
     });
 
     await getComments();
+}
+
+/**
+ *  Shows of hides the comments form based on the user's login status.
+ */
+
+async function showCommentsForm() {
+    const commentsForm = document.getElementById("comments-form");
+    commentsForm.hidden = true;
+
+    const servletURL = "/check-login";
+    const loggedInResponse = await fetch(servletURL);
+    const loggedIn = loggedInResponse.headers.get("loggedIn");
+
+    if (loggedIn == "true") {
+        commentsForm.hidden = false;
+    } else if (loggedIn == "false") {
+        const loginLinkHTML = await loggedInResponse.text();
+        commentsForm.innerHTML = "";
+        commentsForm.innerHTML = loginLinkHTML;
+        commentsForm.hidden = false;
+    }
 }
 
 /**
