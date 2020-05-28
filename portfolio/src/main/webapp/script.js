@@ -33,7 +33,7 @@ async function getComments() {
 	commentsList.innerHTML = "";
 
     comments.forEach(comment => {
-		const content = `[${comment.name}]: ${comment.text}`;
+		const content = `[${comment.email}]: ${comment.text}`;
 
     	commentsList.appendChild(createListElement(content));
     });

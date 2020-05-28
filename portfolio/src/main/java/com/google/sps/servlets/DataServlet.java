@@ -78,12 +78,11 @@ public class DataServlet extends HttpServlet {
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        String name = request.getParameter("comment-name");
-        String text = request.getParameter("comment-text");
         String email = userService.getCurrentUser().getEmail();
+        String text = request.getParameter("comment-text");
         Instant time = Instant.now();
 
-        Comment comment = new Comment(name, email, text, time);
+        Comment comment = new Comment(email, text, time);
         Entity commentEntity = comment.toDatastoreEntity();
 
         datastore.put(commentEntity);
