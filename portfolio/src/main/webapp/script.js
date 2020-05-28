@@ -84,3 +84,12 @@ function createListElement(text) {
 	liElement.innerText = text;
   	return liElement;
 }
+
+var map;
+
+function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+        center: {lat: 33.747, lng: -84.416},
+        zoom: 16
+    });
+}
