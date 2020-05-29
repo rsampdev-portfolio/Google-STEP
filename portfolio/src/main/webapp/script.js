@@ -113,10 +113,30 @@ function initMap() {
         map: map
     });
 
+    var brazealHallMarkerInfowindow = new google.maps.InfoWindow({
+        content: "Brazeal Hall Info Window"
+    });
+
+    brazealHallMarker.addListener('click', function() {
+        brazealHallMarkerInfowindow.open(map, brazealHallMarker);
+        map.setCenter(brazealHallMarker.getPosition());
+        map.setZoom(19);
+    });
+
     const techTowersMarker = new google.maps.Marker({
         position: techTowersLocation,
         title: "Tech Towers",
         map: map
+    });
+
+    var techTowersMarkerInfowindow = new google.maps.InfoWindow({
+        content: "Tech Towers Info Window"
+    });
+
+    techTowersMarker.addListener('click', function() {
+        techTowersMarkerInfowindow.open(map, techTowersMarker);
+        map.setCenter(techTowersMarker.getPosition());
+        map.setZoom(19);
     });
 
     const brawleyHallMarker = new google.maps.Marker({
@@ -125,9 +145,29 @@ function initMap() {
         map: map
     });
 
+    var brawleyHallMarkerInfowindow = new google.maps.InfoWindow({
+        content: "Brawley Hall Info Window"
+    });
+
+    brawleyHallMarker.addListener('click', function() {
+        brawleyHallMarkerInfowindow.open(map, brawleyHallMarker);
+        map.setCenter(brawleyHallMarker.getPosition());
+        map.setZoom(19);
+    });
+
     const leadershipCenterMarker = new google.maps.Marker({
         position: leadershipCenterLocation,
         title: "Leadership Center",
         map: map
+    });
+
+    var leadershipCenterMarkerInfowindow = new google.maps.InfoWindow({
+        content: "Leadership Center Info Window"
+    });
+
+    leadershipCenterMarker.addListener('click', function() {
+        leadershipCenterMarkerInfowindow.open(map, leadershipCenterMarker);
+        map.setCenter(leadershipCenterMarker.getPosition());
+        map.setZoom(19);
     });
 }
