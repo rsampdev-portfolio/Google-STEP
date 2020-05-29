@@ -75,6 +75,6 @@ public class Comment {
     
     @Override
 	public String toString() {
-        return "Comment [id=" + id + ", email=" + email + "text=" + text +", time=" + time + "]";
+        return "Comment [id=" + id + ", email=" + email + ", text=" + text +", time=" + time + "]";
     }
 }

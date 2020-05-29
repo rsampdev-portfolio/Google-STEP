@@ -1,10 +1,14 @@
 package com.google.sps.servlets;
 
 import java.io.IOException;
+import com.google.gson.Gson;
+import java.lang.reflect.Type;
 import javax.servlet.http.HttpServlet;
+import com.google.gson.reflect.TypeToken;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.sps.data.LoginStatusResponse;
 import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
@@ -19,27 +23,35 @@ public class CheckLoginServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        response.setContentType("text/html");
+        boolean loginStatus = false;
+        String email = "";
+        String link;
 
         if (userService.isUserLoggedIn()) {
             String urlToRedirectToAfterUserLogsOut = "/";
             String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
-            String userEmail = userService.getCurrentUser().getEmail();
-
-            response.getWriter().println("<p>Logged In</p>");
-            response.getWriter().println("<p>Email: " + userEmail + "</p>");
-            response.getWriter().println("<p>Logout <a href=\"" + logoutUrl + "\">here</a></p>");
-
-            response.setHeader("loggedIn", "true");
+            email = userService.getCurrentUser().getEmail();
+            loginStatus = true;
+            link = logoutUrl;
         } else {
             String urlToRedirectToAfterUserLogsIn = "/";
             String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
-
-            response.getWriter().println("<p>Not Logged In</p>");
-            response.getWriter().println("<p>Login <a href=\"" + loginUrl + "\">here</a></p>");
-
-            response.setHeader("loggedIn", "false");
+            link = loginUrl;
         }
+
+        LoginStatusResponse loginStatusResponse = new LoginStatusResponse(loginStatus, email, link);
+
+        response.setContentType("application/json");
+
+        String json = convertToJSON(loginStatusResponse);
+        response.getWriter().println(json);
+    }
+
+    private String convertToJSON(LoginStatusResponse loginStatusResponse) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<LoginStatusResponse>() {}.getType();
+        String json = gson.toJson(loginStatusResponse, type);
+        return json;
     }
 
 }

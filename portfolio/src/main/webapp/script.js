@@ -58,20 +58,40 @@ async function deleteComments() {
  */
 
 async function showCommentsForm() {
+    const notLoggedInLink = document.getElementById("not-logged-in-link");
+    const notLoggedInDiv = document.getElementById("not-logged-in-div");
+    const loggedInLink = document.getElementById("logged-in-link");
+    const loggedInDiv = document.getElementById("logged-in-div");
     const commentsForm = document.getElementById("comments-form");
+
+    notLoggedInDiv.hidden = false;
     commentsForm.hidden = true;
+    loggedInDiv.hidden = true;
 
     const servletURL = "/check-login";
-    const loggedInResponse = await fetch(servletURL);
-    const loggedIn = loggedInResponse.headers.get("loggedIn");
+    const loginStatusResponseObject = await fetch(servletURL);
+    const loginStatusResponse = await loginStatusResponseObject.json();
 
-    if (loggedIn == "true") {
+    console.log(loginStatusResponse);
+
+    const loginStatus = loginStatusResponse.loginStatus;
+    const email = loginStatusResponse.email;
+    const link = loginStatusResponse.link;
+
+    console.log(loginStatus);
+    console.log(email);
+    console.log(link);
+
+    if (loginStatus == true) {
+        notLoggedInDiv.hidden = true;
         commentsForm.hidden = false;
-    } else if (loggedIn == "false") {
-        const loginLinkHTML = await loggedInResponse.text();
-        commentsForm.innerHTML = "";
-        commentsForm.innerHTML = loginLinkHTML;
-        commentsForm.hidden = false;
+        loggedInDiv.hidden = false;
+
+        loggedInLink.href = link;
+
+    } else if (loginStatus == false) {
+        notLoggedInLink.href = link;
+    
     }
 }
 

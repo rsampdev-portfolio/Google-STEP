@@ -94,6 +94,18 @@
 
             <h3>Comment Section:</h3>
 
+            <div id="not-logged-in-div">
+                <p>Not logged in</p>
+                
+                <p>Login <a id="not-logged-in-link" href="">here</a></p>
+            </div>
+
+            <div id="logged-in-div">
+                <p>Logged in</p>
+                
+                <p>Logout <a id="logged-in-link" href="">here</a></p>
+            </div>
+
             <form id="comments-form" action="/data" method="POST">
                 <label>Comment: </label>
                 <br>
@@ -119,7 +131,7 @@
                 showCommentsForm();
                 getComments();
             </script>
-
+            
             <input type="submit" value="Delete All Comments" onclick="deleteComments();">
             
         </div>

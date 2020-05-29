@@ -92,7 +92,7 @@ public class DataServlet extends HttpServlet {
 
     private String convertToJSON(List<Comment> comments) {
         Gson gson = new Gson();
-        Type type = new TypeToken<List<Comment>>(){}.getType();
+        Type type = new TypeToken<List<Comment>>() {}.getType();
         String json = gson.toJson(comments, type);
         return json;
     }
