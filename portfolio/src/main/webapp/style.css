@@ -9,6 +9,8 @@
 }
 
 #map {
-    height: 400px;
-    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    height: 550px;
+    width: 650px;
 }

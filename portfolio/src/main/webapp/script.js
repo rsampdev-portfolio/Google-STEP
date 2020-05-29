@@ -88,18 +88,46 @@ function createListElement(text) {
 var map;
 
 function initMap() {
-    var morehouseLocation = new google.maps.LatLng(33.747, -84.416);
+    const morehouseLocation = new google.maps.LatLng(33.747, -84.416);
+    const brazealHallLocation = new google.maps.LatLng(33.748856, -84.416192);
+    const techTowersLocation = new google.maps.LatLng(33.748400, -84.414113);
+    const brawleyHallLocation = new google.maps.LatLng(33.746881, -84.414399);
+    const leadershipCenterLocation = new google.maps.LatLng(33.744758, -84.414880);
 
-    var mapOptions = {
+    const mapOptions = {
         center: morehouseLocation,
         clickableIcons: true,
         mapTypeControl: false,
         draggable: true,
         maxZoom: 20,
-        zoom: 16,
+        zoom: 17,
     };
 
     map = new google.maps.Map(document.getElementById('map'), mapOptions);
     map.setMapTypeId('roadmap');
     map.setTilt(45);
+
+    const brazealHallMarker = new google.maps.Marker({
+        position: brazealHallLocation,
+        title: "Brazeal Hall",
+        map: map
+    });
+
+    const techTowersMarker = new google.maps.Marker({
+        position: techTowersLocation,
+        title: "Tech Towers",
+        map: map
+    });
+
+    const brawleyHallMarker = new google.maps.Marker({
+        position: brawleyHallLocation,
+        title: "Brawley Hall",
+        map: map
+    });
+
+    const leadershipCenterMarker = new google.maps.Marker({
+        position: leadershipCenterLocation,
+        title: "Leadership Center",
+        map: map
+    });
 }
