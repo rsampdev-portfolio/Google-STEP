@@ -88,8 +88,18 @@ function createListElement(text) {
 var map;
 
 function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-        center: {lat: 33.747, lng: -84.416},
-        zoom: 16
-    });
+    var morehouseLocation = new google.maps.LatLng(33.747, -84.416);
+
+    var mapOptions = {
+        center: morehouseLocation,
+        clickableIcons: true,
+        mapTypeControl: false,
+        draggable: true,
+        maxZoom: 20,
+        zoom: 16,
+    };
+
+    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+    map.setMapTypeId('roadmap');
+    map.setTilt(45);
 }
