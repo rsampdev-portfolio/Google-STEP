@@ -54,15 +54,19 @@ async function deleteComments() {
 }
 
 /**
- *  Shows of hides the comments form based on the user's login status.
+ *  Shows or hides the comments form based on the user's login status.
+ *  
+ *  Also shows a link to either login or logout
+ *  based on the current user's login status. 
  */
 
 async function showCommentsForm() {
     const notLoggedInLink = document.getElementById("not-logged-in-link");
+    const userEmailHolder = document.getElementById("user-email-holder");
     const notLoggedInDiv = document.getElementById("not-logged-in-div");
     const loggedInLink = document.getElementById("logged-in-link");
-    const loggedInDiv = document.getElementById("logged-in-div");
     const commentsForm = document.getElementById("comments-form");
+    const loggedInDiv = document.getElementById("logged-in-div");
 
     notLoggedInDiv.hidden = false;
     commentsForm.hidden = true;
@@ -72,26 +76,18 @@ async function showCommentsForm() {
     const loginStatusResponseObject = await fetch(servletURL);
     const loginStatusResponse = await loginStatusResponseObject.json();
 
-    console.log(loginStatusResponse);
-
     const loginStatus = loginStatusResponse.loginStatus;
     const email = loginStatusResponse.email;
     const link = loginStatusResponse.link;
 
-    console.log(loginStatus);
-    console.log(email);
-    console.log(link);
-
     if (loginStatus == true) {
+        userEmailHolder.innerText = email;
         notLoggedInDiv.hidden = true;
         commentsForm.hidden = false;
         loggedInDiv.hidden = false;
-
         loggedInLink.href = link;
-
     } else if (loginStatus == false) {
         notLoggedInLink.href = link;
-    
     }
 }
 
@@ -107,6 +103,10 @@ function createListElement(text) {
 
 var map;
 
+/**
+ *  Initializes a map of Morehouse College with custom markers.
+ */
+ 
 function initMap() {
     const morehouseLocation = new google.maps.LatLng(33.747, -84.416);
     const brazealHallLocation = new google.maps.LatLng(33.748856, -84.416192);

@@ -13,13 +13,17 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 
 /**
- *    Servlet that checks if a user is logged in or not.
+ *  Servlet that checks if a user is logged in or not.
  */
 
 @WebServlet("/check-login")
 public class CheckLoginServlet extends HttpServlet {
 
     private UserService userService = UserServiceFactory.getUserService();
+
+    /**
+     *  Returns a LoginStatusResponse object in JSON format.
+     */
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -46,6 +50,10 @@ public class CheckLoginServlet extends HttpServlet {
         String json = convertToJSON(loginStatusResponse);
         response.getWriter().println(json);
     }
+
+    /**
+     *  Converts a LoginStatusResponse object into JSON using Gson.
+     */
 
     private String convertToJSON(LoginStatusResponse loginStatusResponse) {
         Gson gson = new Gson();

@@ -36,7 +36,7 @@ import com.google.appengine.api.datastore.Query.SortDirection;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
- *    Servlet that handles creating and also returning comment data.
+ *  Servlet that handles creating and also returning comment data.
  */
 
 @WebServlet("/data")
@@ -46,6 +46,10 @@ public class DataServlet extends HttpServlet {
     private UserService userService = UserServiceFactory.getUserService();
     
     private int maxNumberOfComments = 20;
+
+    /**
+     *  Returns all comment objects in the Datastore in JSON format in descending order.
+     */
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
@@ -76,6 +80,10 @@ public class DataServlet extends HttpServlet {
         response.getWriter().println(json);
     }
 
+    /**
+     *  Create a new comment object and add it to the Datastore.
+     */
+
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String email = userService.getCurrentUser().getEmail();
@@ -89,6 +97,10 @@ public class DataServlet extends HttpServlet {
 
         response.sendRedirect("/index.html");
     }
+
+    /**
+     *  Converts a List of Comment objects into JSON using Gson.
+     */
 
     private String convertToJSON(List<Comment> comments) {
         Gson gson = new Gson();

@@ -14,13 +14,17 @@ import com.google.appengine.api.datastore.DatastoreService;
 import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
- *    Servlet that handles deleting all comment data.
+ *  Servlet that handles deleting all comment data.
  */
 
 @WebServlet("/delete-data")
 public class DeleteDataServlet extends HttpServlet {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+
+    /**
+     *  Delete all comment objects from the Datastore.
+     */
 
     @Override
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
