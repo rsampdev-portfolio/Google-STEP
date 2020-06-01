@@ -18,10 +18,33 @@ package com.google.sps;
  * Utility class for creating greeting messages.
  */
 public class Greeter {
-  /**
-   * Returns a greeting for the given name.
-   */
-  public String greet(String name) {
-    return "Hello " + name;
-  }
+    /**
+     * Returns true is the input character is a special character.
+     */
+    private boolean isSpecialCharacter(char ch) {
+        return (ch >= '!' && ch <= '/') ||
+               (ch >= ':' && ch <= '@') ||
+               (ch >= '[' && ch <= '`') ||
+               (ch >= '{' && ch <= '~');
+    }
+
+    /**
+     * Returns a greeting for the given name.
+     */
+    public String greet(String name) {
+        int size = name.length();
+        String buffer = "";
+
+        for (int index = 0; index < size; index++) {
+            char character = name.charAt(index);
+
+            if (!isSpecialCharacter(character)) {
+                buffer = buffer + character;
+            }
+        }
+
+        buffer = buffer.trim();
+
+        return "Hello " + buffer;
+    }
 }
