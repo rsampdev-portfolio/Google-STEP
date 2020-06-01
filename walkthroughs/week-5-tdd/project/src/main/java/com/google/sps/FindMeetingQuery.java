@@ -36,11 +36,11 @@ public final class FindMeetingQuery {
             openMeetingSlots = new ArrayList<>();
             openMeetingSlots.add(TimeRange.WHOLE_DAY);
 
-            for (Event event : events) {
+            Collection<TimeRange> whens = getSmoothedTimeRangesFromEvents(events);
 
+            for (TimeRange when : whens) {
                 for (int index = 0; index < openMeetingSlots.size(); index++) {
                     TimeRange range = openMeetingSlots.get(index);
-                    TimeRange when = event.getWhen();
                     TimeRange secondHalf = null;
                     TimeRange firstHalf = null;
 
@@ -51,7 +51,6 @@ public final class FindMeetingQuery {
 
                         firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
                         secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
-
 
                         System.out.println(firstHalf);
                         System.out.println(when);
@@ -65,8 +64,7 @@ public final class FindMeetingQuery {
                         openMeetingSlots.add(index, secondHalf);
                         openMeetingSlots.add(index, firstHalf);
                     }
-                }            
-
+                }
             }
 
             // throw new UnsupportedOperationException("TODO: Implement this method.");
@@ -77,6 +75,41 @@ public final class FindMeetingQuery {
         }
 
         return openMeetingSlots;
+    }
+
+    private Collection<TimeRange> getSmoothedTimeRangesFromEvents(Collection<Event> events) {
+        ArrayList<TimeRange> rangesBuffer = new ArrayList<>();
+
+        for (Event event : events) {
+            rangesBuffer.add(event.getWhen());
+        }
+
+        boolean flag = true;
+
+        while (flag) {
+            flag = false;
+
+            for (int index = 0; index < rangesBuffer.size() - 1; index++) {
+
+                TimeRange current = rangesBuffer.get(index);
+                TimeRange next = rangesBuffer.get(index + 1);
+
+                if (current.overlaps(next)) {
+                    TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
+
+                    rangesBuffer.remove(index);
+                    rangesBuffer.remove(index);
+
+                    rangesBuffer.add(index, resolved);
+
+                    flag = true;
+                }
+
+            }
+
+        }
+
+        return rangesBuffer;
     }
 
 }
