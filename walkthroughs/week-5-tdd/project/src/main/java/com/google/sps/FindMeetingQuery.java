@@ -14,6 +14,7 @@
 
 package com.google.sps;
 
+import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,7 +22,7 @@ import java.util.Collections;
 public final class FindMeetingQuery {
     
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-        Collection<TimeRange> openMeetingSlots;
+        List<TimeRange> openMeetingSlots;
 
         Collection<String> attendees = request.getAttendees();
         long duration = request.getDuration();
@@ -32,13 +33,47 @@ public final class FindMeetingQuery {
         } else if (duration < 0 || duration > TimeRange.WHOLE_DAY.duration()) {
             openMeetingSlots = new ArrayList<>();
         } else {
+            openMeetingSlots = new ArrayList<>();
+            openMeetingSlots.add(TimeRange.WHOLE_DAY);
 
-            throw new UnsupportedOperationException("TODO: Implement this method.");
+            for (Event event : events) {
 
+                for (int index = 0; index < openMeetingSlots.size(); index++) {
+                    TimeRange range = openMeetingSlots.get(index);
+                    TimeRange when = event.getWhen();
+                    TimeRange secondHalf = null;
+                    TimeRange firstHalf = null;
+
+                    if (range.contains(when)) {
+                        System.out.println("\n\n\n");
+                        System.out.println("CONFLICT");
+                        System.out.println("\n\n\n");
+
+                        firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
+                        secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
+
+
+                        System.out.println(firstHalf);
+                        System.out.println(when);
+                        System.out.println(secondHalf);
+
+                        index = openMeetingSlots.indexOf(range);
+                    }
+
+                    if (firstHalf != null && secondHalf != null) {
+                        openMeetingSlots.remove(index);
+                        openMeetingSlots.add(index, secondHalf);
+                        openMeetingSlots.add(index, firstHalf);
+                    }
+                }            
+
+            }
+
+            // throw new UnsupportedOperationException("TODO: Implement this method.");
         }
         
         if (openMeetingSlots == null) {
-            openMeetingSlots = Collections.emptySet();
+            openMeetingSlots = new ArrayList<>();
         }
 
         return openMeetingSlots;
