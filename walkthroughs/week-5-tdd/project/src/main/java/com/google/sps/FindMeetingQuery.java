@@ -22,21 +22,17 @@ import java.util.Collections;
 public final class FindMeetingQuery {
     
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-        List<TimeRange> openMeetingSlots;
-
         Collection<String> attendees = request.getAttendees();
+        List<TimeRange> openMeetingSlots = new ArrayList<>();
         long duration = request.getDuration();
 
-        if (attendees.size() == 0) {
-            openMeetingSlots = new ArrayList<>();
-            openMeetingSlots.add(TimeRange.WHOLE_DAY);
-        } else if (duration < 0 || duration > TimeRange.WHOLE_DAY.duration()) {
-            openMeetingSlots = new ArrayList<>();
-        } else {
-            openMeetingSlots = new ArrayList<>();
-            openMeetingSlots.add(TimeRange.WHOLE_DAY);
+        boolean outOfBoundsDuration = (duration < 0 || duration > TimeRange.WHOLE_DAY.duration());
 
+        if (attendees.isEmpty()) {
+            openMeetingSlots.add(TimeRange.WHOLE_DAY);
+        } else if (!outOfBoundsDuration) {
             Collection<TimeRange> whens = getSmoothedTimeRangesFromEvents(events);
+            openMeetingSlots.add(TimeRange.WHOLE_DAY);
 
             for (TimeRange when : whens) {
                 for (int index = 0; index < openMeetingSlots.size(); index++) {
@@ -45,17 +41,8 @@ public final class FindMeetingQuery {
                     TimeRange firstHalf = null;
 
                     if (range.contains(when)) {
-                        System.out.println("\n\n\n");
-                        System.out.println("CONFLICT");
-                        System.out.println("\n\n\n");
-
                         firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
                         secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
-
-                        System.out.println(firstHalf);
-                        System.out.println(when);
-                        System.out.println(secondHalf);
-
                         index = openMeetingSlots.indexOf(range);
                     }
 
@@ -66,12 +53,6 @@ public final class FindMeetingQuery {
                     }
                 }
             }
-
-            // throw new UnsupportedOperationException("TODO: Implement this method.");
-        }
-        
-        if (openMeetingSlots == null) {
-            openMeetingSlots = new ArrayList<>();
         }
 
         return openMeetingSlots;
@@ -79,36 +60,35 @@ public final class FindMeetingQuery {
 
     private Collection<TimeRange> getSmoothedTimeRangesFromEvents(Collection<Event> events) {
         ArrayList<TimeRange> rangesBuffer = new ArrayList<>();
+        boolean flag = true;
 
         for (Event event : events) {
             rangesBuffer.add(event.getWhen());
         }
 
-        boolean flag = true;
-
         while (flag) {
             flag = false;
 
-            for (int index = 0; index < rangesBuffer.size() - 1; index++) {
-
-                TimeRange current = rangesBuffer.get(index);
+            for (int index = 0; index < rangesBuffer.size() - 1 && flag == false; index++) {
                 TimeRange next = rangesBuffer.get(index + 1);
+                TimeRange current = rangesBuffer.get(index);
+                flag = true;
 
-                if (current.overlaps(next)) {
+                if (current.contains(next)) {
+                    rangesBuffer.remove(next);
+                } else if (next.contains(current)) {
+                    rangesBuffer.remove(current);
+                } else if (current.overlaps(next)) {
                     TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
-
                     rangesBuffer.remove(index);
                     rangesBuffer.remove(index);
-
                     rangesBuffer.add(index, resolved);
-
-                    flag = true;
+                } else {
+                    flag = false;
                 }
-
             }
-
         }
-
+        
         return rangesBuffer;
     }
 
