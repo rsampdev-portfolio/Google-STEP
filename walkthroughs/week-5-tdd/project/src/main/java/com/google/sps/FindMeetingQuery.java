@@ -55,6 +55,8 @@ public final class FindMeetingQuery {
             }
         }
 
+        openMeetingSlots = removeOpenPointMeetingSlots(openMeetingSlots);
+
         return openMeetingSlots;
     }
 
@@ -90,6 +92,18 @@ public final class FindMeetingQuery {
         }
         
         return rangesBuffer;
+    }
+
+    private List<TimeRange> removeOpenPointMeetingSlots(List<TimeRange> openMeetingSlots) {
+        List<TimeRange> meetingsBuffer = new ArrayList<>();
+
+        for (TimeRange meetingSlot : openMeetingSlots) {
+            if (meetingSlot.duration() > 0) {
+                meetingsBuffer.add(meetingSlot);
+            }
+        }
+
+        return meetingsBuffer;
     }
 
 }
