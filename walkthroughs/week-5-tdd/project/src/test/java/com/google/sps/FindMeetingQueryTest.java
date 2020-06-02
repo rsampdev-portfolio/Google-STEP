@@ -270,5 +270,29 @@ public final class FindMeetingQueryTest {
 
     Assert.assertEquals(expected, actual);
   }
-}
 
+  @Test
+  public void oneOptionalAttendeeWithNoFreeTime() {
+		
+  }
+
+	@Test
+  public void oneOptionalAttendeeWithOneEvent() {
+		
+  }
+
+	@Test
+  public void oneOptionalAttendeeWithNotEnoughFreeTime() {
+		
+  }
+
+	@Test
+  public void twoOptionalAttendeesWithFreeTime() {
+		
+  }
+
+	@Test
+ 	public void twoOptionalAttendeesWithNoFreeTime() {
+		
+  }
+}
