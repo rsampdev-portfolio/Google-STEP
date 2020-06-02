@@ -14,6 +14,7 @@
 
 package com.google.sps;
 
+import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,12 +23,14 @@ import java.util.Collections;
 public final class FindMeetingQuery {
     
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-        Collection<String> attendees = request.getAttendees();
         List<TimeRange> openMeetingSlots = new ArrayList<>();
+        Collection<String> attendees = request.getAttendees();
         long duration = request.getDuration();
 
-        boolean outOfBoundsDuration = (duration < 0 || duration > TimeRange.WHOLE_DAY.duration());
+        events = removeIrrelevantEvents(events, attendees);
 
+        boolean outOfBoundsDuration = (duration < 0 || duration > TimeRange.WHOLE_DAY.duration());
+        
         if (attendees.isEmpty()) {
             openMeetingSlots.add(TimeRange.WHOLE_DAY);
         } else if (!outOfBoundsDuration) {
@@ -58,6 +61,23 @@ public final class FindMeetingQuery {
         openMeetingSlots = removeOpenPointMeetingSlots(openMeetingSlots);
 
         return openMeetingSlots;
+    }
+
+    private Collection<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
+        ArrayList<Event> events = new ArrayList<>();
+
+        for (Event event : eventsCollection) {
+            Set<String> eventAttendees = event.getAttendees();
+            
+            for (String attendee : attendees) {
+                if (eventAttendees.contains(attendee)) {
+                    events.add(event);
+                    continue;
+                }
+            }
+        }
+
+        return events;
     }
 
     private Collection<TimeRange> getSmoothedTimeRangesFromEvents(Collection<Event> events) {
