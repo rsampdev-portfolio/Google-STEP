@@ -23,48 +23,25 @@ import java.util.Collections;
 public final class FindMeetingQuery {
     
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-        List<TimeRange> openMeetingSlots = new ArrayList<>();
         Collection<String> attendees = request.getAttendees();
+        List<TimeRange> openMeetingSlots = new ArrayList<>();
         long duration = request.getDuration();
 
         events = removeIrrelevantEvents(events, attendees);
 
-        boolean outOfBoundsDuration = (duration < 0 || duration > TimeRange.WHOLE_DAY.duration());
+        boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
         
         if (attendees.isEmpty()) {
             openMeetingSlots.add(TimeRange.WHOLE_DAY);
-        } else if (!outOfBoundsDuration) {
-            Collection<TimeRange> whens = getSmoothedTimeRangesFromEvents(events);
-            openMeetingSlots.add(TimeRange.WHOLE_DAY);
-
-            for (TimeRange when : whens) {
-                for (int index = 0; index < openMeetingSlots.size(); index++) {
-                    TimeRange range = openMeetingSlots.get(index);
-                    TimeRange secondHalf = null;
-                    TimeRange firstHalf = null;
-
-                    if (range.contains(when)) {
-                        firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
-                        secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
-                        index = openMeetingSlots.indexOf(range);
-                    }
-
-                    if (firstHalf != null && secondHalf != null) {
-                        openMeetingSlots.remove(index);
-                        openMeetingSlots.add(index, secondHalf);
-                        openMeetingSlots.add(index, firstHalf);
-                    }
-                }
-            }
+        } else if (!durationIsOutOfBounds) {
+            openMeetingSlots = getOpenMeetingSlots(events, duration);
         }
-
-        openMeetingSlots = removeOpenPointMeetingSlots(openMeetingSlots);
 
         return openMeetingSlots;
     }
 
     private Collection<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
-        ArrayList<Event> events = new ArrayList<>();
+        Collection<Event> events = new ArrayList<>();
 
         for (Event event : eventsCollection) {
             Set<String> eventAttendees = event.getAttendees();
@@ -78,6 +55,36 @@ public final class FindMeetingQuery {
         }
 
         return events;
+    }
+
+    private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
+        Collection<TimeRange> whens = getSmoothedTimeRangesFromEvents(events);
+        List<TimeRange> openMeetingSlots = new ArrayList<>();
+        openMeetingSlots.add(TimeRange.WHOLE_DAY);
+
+        for (TimeRange when : whens) {
+            for (int index = 0; index < openMeetingSlots.size(); index++) {
+                TimeRange range = openMeetingSlots.get(index);
+                TimeRange secondHalf = null;
+                TimeRange firstHalf = null;
+
+                if (range.contains(when)) {
+                    firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
+                    secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
+                    index = openMeetingSlots.indexOf(range);
+                }
+
+                if (firstHalf != null && secondHalf != null) {
+                    openMeetingSlots.remove(index);
+                    openMeetingSlots.add(index, secondHalf);
+                    openMeetingSlots.add(index, firstHalf);
+                }
+            }
+        }
+        
+        openMeetingSlots = removeOpenPointsAndTooSmallMeetingSlots(openMeetingSlots, duration);
+
+        return openMeetingSlots;
     }
 
     private Collection<TimeRange> getSmoothedTimeRangesFromEvents(Collection<Event> events) {
@@ -114,16 +121,16 @@ public final class FindMeetingQuery {
         return rangesBuffer;
     }
 
-    private List<TimeRange> removeOpenPointMeetingSlots(List<TimeRange> openMeetingSlots) {
+    private List<TimeRange> removeOpenPointsAndTooSmallMeetingSlots(List<TimeRange> openMeetingSlots, long duration) {
         List<TimeRange> meetingsBuffer = new ArrayList<>();
 
         for (TimeRange meetingSlot : openMeetingSlots) {
-            if (meetingSlot.duration() > 0) {
+            if (meetingSlot.duration() >= duration) {
                 meetingsBuffer.add(meetingSlot);
             }
         }
 
         return meetingsBuffer;
     }
-
+    
 }
