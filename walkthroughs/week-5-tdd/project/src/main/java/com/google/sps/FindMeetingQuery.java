@@ -16,6 +16,8 @@ package com.google.sps;
 
 import java.util.Set;
 import java.util.List;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -23,10 +25,17 @@ import java.util.Collections;
 public final class FindMeetingQuery {
     
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-        Collection<String> attendees = request.getAttendees();
+        Collection<String> optionalAttendees = request.getOptionalAttendees();
         List<TimeRange> openMeetingSlots = new ArrayList<>();
         long duration = request.getDuration();
+		Collection<String> attendees;
 
+		if (!optionalAttendees.isEmpty()) {
+			attendees = filterOutOptionalAttedees(request.getAttendees(), optionalAttendees, events, duration);
+		} else {
+			attendees = request.getAttendees();
+		}
+        
         events = removeIrrelevantEvents(events, attendees);
 
         boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
@@ -38,6 +47,35 @@ public final class FindMeetingQuery {
         }
 
         return openMeetingSlots;
+    }
+
+    private Collection<String> filterOutOptionalAttedees(Collection<String> attendees, Collection<String> optionalAttendees, Collection<Event> events, long duration) {
+		Collection<String> allAttendees = new HashSet<>(attendees);
+
+        if (!optionalAttendees.isEmpty()) {
+            boolean hasSomeFreeTime;
+
+            for (String optionalAttendee : optionalAttendees) {
+                allAttendees.add(optionalAttendee);
+                hasSomeFreeTime = false;
+
+                MeetingRequest request = new MeetingRequest(allAttendees, duration);
+                Collection<TimeRange> optionalAttendeeFreeTime = query(events, request);
+                
+                for (TimeRange range : optionalAttendeeFreeTime) {
+                    if (range.duration() >= duration) {
+                        hasSomeFreeTime = true;
+                        break;
+                    }
+                }
+
+                if (!hasSomeFreeTime) {
+                    allAttendees.remove(optionalAttendee);
+                }   
+            } 
+        }	
+        
+        return allAttendees;
     }
 
     private Collection<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
