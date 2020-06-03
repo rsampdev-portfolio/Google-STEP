@@ -26,21 +26,26 @@ public final class FindMeetingQuery {
     
     public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
         Collection<String> optionalAttendees = request.getOptionalAttendees();
+        Collection<String> initialAttendees = request.getAttendees();
         List<TimeRange> openMeetingSlots = new ArrayList<>();
         long duration = request.getDuration();
-		Collection<String> attendees;
+		Collection<String> allAttendees;
 
-		if (!optionalAttendees.isEmpty()) {
-			attendees = filterOutOptionalAttedees(request.getAttendees(), optionalAttendees, events, duration);
-		} else {
-			attendees = request.getAttendees();
-		}
-        
-        events = removeIrrelevantEvents(events, attendees);
+        if (request.getAttendees().isEmpty()) {
+            allAttendees = optionalAttendees;
+        } else {
+            if (!optionalAttendees.isEmpty()) {
+			    allAttendees = filterOutOptionalAttedees(initialAttendees, optionalAttendees, events, duration);
+		    } else {
+			    allAttendees = request.getAttendees();
+		    }
+        }
+
+        events = removeIrrelevantEvents(events, allAttendees);
 
         boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
         
-        if (attendees.isEmpty()) {
+        if (allAttendees.isEmpty()) {
             openMeetingSlots.add(TimeRange.WHOLE_DAY);
         } else if (!durationIsOutOfBounds) {
             openMeetingSlots = getOpenMeetingSlots(events, duration);
