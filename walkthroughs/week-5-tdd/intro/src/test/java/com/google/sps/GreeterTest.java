@@ -23,7 +23,7 @@ import org.junit.runners.JUnit4;
 public final class GreeterTest {
 
     @Test
-    public void testGreeting() {
+    public void greet_withOnlyAlphabeticCharacters_prependHelloWithNoSpecialCharacterRemovalOrSpaceTrimming() {
         Greeter greeter = new Greeter();
 
         String greeting = greeter.greet("Ada");
@@ -32,7 +32,7 @@ public final class GreeterTest {
     }
 
     @Test
-    public void testGreetingTrimsWhitespace() {
+    public void greet_withAlphabeticCharactersAndExtraSpaceOnTheEnds_prependHelloWithSpaceTrimming() {
         Greeter greeter = new Greeter();
 
         String greeting = greeter.greet("   Ada   ");
@@ -42,7 +42,7 @@ public final class GreeterTest {
     }
 
     @Test
-    public void testGreetingRemoveSpecialCharacters() {
+    public void greet_withBothAlphabeticAndSpecialCharacters_prependHelloWithSpecialCharacterRemoval() {
         Greeter greeter = new Greeter();
 
         String greeting = greeter.greet("Sampson/*!@#$%^&*()\"{}_[]|\\?/<>,.");
