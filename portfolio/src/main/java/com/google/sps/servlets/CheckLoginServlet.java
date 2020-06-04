@@ -27,7 +27,7 @@ public class CheckLoginServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        boolean loginStatus = false;
+        boolean isLoggedIn = false;
         String email = "";
         String link;
 
@@ -35,7 +35,7 @@ public class CheckLoginServlet extends HttpServlet {
             String urlToRedirectToAfterUserLogsOut = "/";
             String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
             email = userService.getCurrentUser().getEmail();
-            loginStatus = true;
+            isLoggedIn = true;
             link = logoutUrl;
         } else {
             String urlToRedirectToAfterUserLogsIn = "/";
@@ -43,10 +43,9 @@ public class CheckLoginServlet extends HttpServlet {
             link = loginUrl;
         }
 
-        LoginStatusResponse loginStatusResponse = new LoginStatusResponse(loginStatus, email, link);
-
         response.setContentType("application/json");
 
+        LoginStatusResponse loginStatusResponse = new LoginStatusResponse(isLoggedIn, email, link);
         String json = convertToJSON(loginStatusResponse);
         response.getWriter().println(json);
     }

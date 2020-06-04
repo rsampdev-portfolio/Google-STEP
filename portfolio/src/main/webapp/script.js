@@ -76,17 +76,17 @@ async function showCommentsForm() {
     const loginStatusResponseObject = await fetch(servletURL);
     const loginStatusResponse = await loginStatusResponseObject.json();
 
-    const loginStatus = loginStatusResponse.loginStatus;
+    const isLoggedIn = loginStatusResponse.isLoggedIn;
     const email = loginStatusResponse.email;
     const link = loginStatusResponse.link;
 
-    if (loginStatus == true) {
+    if (isLoggedIn) {
         userEmailHolder.innerText = email;
         notLoggedInDiv.hidden = true;
         commentsForm.hidden = false;
         loggedInDiv.hidden = false;
         loggedInLink.href = link;
-    } else if (loginStatus == false) {
+    } else {
         notLoggedInLink.href = link;
     }
 }

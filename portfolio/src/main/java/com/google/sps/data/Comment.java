@@ -11,7 +11,7 @@ import com.google.appengine.api.datastore.Entity;
  *  to and from Datastore Entities.
  */
 
-public class Comment {
+public final class Comment {
     private long id = 0L;
     private String email;
     private String text;
@@ -74,7 +74,7 @@ public class Comment {
     }
     
     @Override
-	public String toString() {
+    public String toString() {
         return "Comment [id=" + id + ", email=" + email + ", text=" + text +", time=" + time + "]";
     }
 }

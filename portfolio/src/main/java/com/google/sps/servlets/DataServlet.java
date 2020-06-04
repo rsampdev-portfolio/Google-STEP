@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import com.google.gson.Gson;
 import java.lang.reflect.Type;
 import com.google.sps.data.Comment;
+import java.util.stream.Collectors;
 import javax.servlet.http.HttpServlet;
 import com.google.gson.reflect.TypeToken;
 import javax.servlet.annotation.WebServlet;
@@ -29,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.google.appengine.api.datastore.Query;
 import com.google.appengine.api.datastore.Entity;
 import com.google.appengine.api.users.UserService;
+import com.google.appengine.api.datastore.FetchOptions;
 import com.google.appengine.api.datastore.PreparedQuery;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.appengine.api.datastore.DatastoreService;
@@ -43,9 +45,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
 public class DataServlet extends HttpServlet {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
-    private UserService userService = UserServiceFactory.getUserService();
-    
-    private int maxNumberOfComments = 20;
+    private final UserService userService = UserServiceFactory.getUserService();
 
     /**
      *  Returns all comment objects in the Datastore in JSON format in descending order.
@@ -53,7 +53,7 @@ public class DataServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        List<Comment> comments = new ArrayList<>();
+        int maxNumberOfComments = 20;
         
         Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
         PreparedQuery results = datastore.prepare(query);
@@ -64,19 +64,11 @@ public class DataServlet extends HttpServlet {
             String maxNumberOfCommentsString = request.getParameter("max-comments");
             maxNumberOfComments = Integer.parseInt(maxNumberOfCommentsString);
         }
-
-        for (Entity entity : results.asIterable()) {
-            Comment comment = Comment.fromDatastoreEntity(entity);
-
-            if (numberOfComments < maxNumberOfComments) {
-                comments.add(comment);
-                numberOfComments++;
-            }
-        }
-
-        String json = convertToJSON(comments);
-
+        
         response.setContentType("application/json;");
+
+        List<Comment> comments = results.asList(FetchOptions.Builder.withLimit(maxNumberOfComments)).stream().map(Comment::fromDatastoreEntity).collect(Collectors.toList());
+        String json = convertToJSON(comments);
         response.getWriter().println(json);
     }
 

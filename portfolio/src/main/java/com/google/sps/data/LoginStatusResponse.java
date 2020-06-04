@@ -9,18 +9,18 @@ import com.google.appengine.api.datastore.Entity;
  */
 
 public class LoginStatusResponse {
-    private boolean loginStatus;
+    private boolean isLoggedIn;
     private String email;
     private String link;
 
-    public LoginStatusResponse(boolean loginStatus, String email, String link) {
-        this.loginStatus = loginStatus;
+    public LoginStatusResponse(boolean isLoggedIn, String email, String link) {
+        this.isLoggedIn = isLoggedIn;
         this.email = email;
         this.link = link;
     }
 
     @Override
     public String toString() {
-        return "LoginStatusResponse [login-status=" + loginStatus + ", email=" + email + ", link=" + link + "]";
+        return "LoginResponse [is-logged-in=" + isLoggedIn + ", email=" + email + ", link=" + link + "]";
     }
 }
