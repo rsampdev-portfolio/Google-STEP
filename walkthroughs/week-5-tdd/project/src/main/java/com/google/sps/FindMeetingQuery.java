@@ -21,159 +21,125 @@ import java.util.HashSet;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 public final class FindMeetingQuery {
     
-    public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-        Collection<String> optionalAttendees = request.getOptionalAttendees();
-        Collection<String> initialAttendees = request.getAttendees();
-        List<TimeRange> openMeetingSlots = new ArrayList<>();
-        long duration = request.getDuration();
-		Collection<String> allAttendees;
+  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+    Collection<String> optionalAttendees = request.getOptionalAttendees();
+    Collection<String> primaryAttendees = request.getAttendees();
+    List<TimeRange> openMeetingSlots = new ArrayList<>();
+    long duration = request.getDuration();
 
-        if (request.getAttendees().isEmpty()) {
-            allAttendees = optionalAttendees;
-        } else {
-            if (!optionalAttendees.isEmpty()) {
-			    allAttendees = filterOutOptionalAttedees(initialAttendees, optionalAttendees, events, duration);
-		    } else {
-			    allAttendees = request.getAttendees();
-		    }
-        }
+    boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
 
-        events = removeIrrelevantEvents(events, allAttendees);
-
-        boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
-        
-        if (allAttendees.isEmpty()) {
-            openMeetingSlots.add(TimeRange.WHOLE_DAY);
-        } else if (!durationIsOutOfBounds) {
-            openMeetingSlots = getOpenMeetingSlots(events, duration);
-        }
-
-        return openMeetingSlots;
+    if (durationIsOutOfBounds) {
+      return Collections.emptyList();
+    } else if (primaryAttendees.isEmpty()) {
+			openMeetingSlots = List.of(TimeRange.WHOLE_DAY);
     }
 
-    private Collection<String> filterOutOptionalAttedees(Collection<String> attendees, Collection<String> optionalAttendees, Collection<Event> events, long duration) {
-		Collection<String> allAttendees = new HashSet<>(attendees);
+    if (!optionalAttendees.isEmpty()) {
+    	Collection<String> allAttendees = new HashSet<>();
+    	allAttendees.addAll(primaryAttendees);
+      allAttendees.addAll(optionalAttendees);
 
-        if (!optionalAttendees.isEmpty()) {
-            boolean hasSomeFreeTime;
+      Collection<Event> tempEvents = removeIrrelevantEvents(events, allAttendees);
+      openMeetingSlots = getOpenMeetingSlots(tempEvents, duration);            
+		}
 
-            for (String optionalAttendee : optionalAttendees) {
-                allAttendees.add(optionalAttendee);
-                hasSomeFreeTime = false;
-
-                MeetingRequest request = new MeetingRequest(allAttendees, duration);
-                Collection<TimeRange> optionalAttendeeFreeTime = query(events, request);
-                
-                for (TimeRange range : optionalAttendeeFreeTime) {
-                    if (range.duration() >= duration) {
-                        hasSomeFreeTime = true;
-                        break;
-                    }
-                }
-
-                if (!hasSomeFreeTime) {
-                    allAttendees.remove(optionalAttendee);
-                }   
-            } 
-        }	
-        
-        return allAttendees;
+    if (openMeetingSlots.isEmpty()) {
+    	if (primaryAttendees.isEmpty()) {
+				return Collections.emptyList();
+      } else {
+        events = removeIrrelevantEvents(events, primaryAttendees);
+        openMeetingSlots = getOpenMeetingSlots(events, duration);
+      }
     }
 
-    private Collection<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
-        Collection<Event> events = new ArrayList<>();
+    return openMeetingSlots;
+  }
+    
+  private Collection<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
+    Collection<Event> events = new ArrayList<>();
 
-        for (Event event : eventsCollection) {
-            Set<String> eventAttendees = event.getAttendees();
+    for (Event event : eventsCollection) {
+    	Set<String> eventAttendees = event.getAttendees();
             
-            for (String attendee : attendees) {
-                if (eventAttendees.contains(attendee)) {
-                    events.add(event);
-                    continue;
-                }
-            }
-        }
-
-        return events;
+    	for (String attendee : attendees) {
+    		if (eventAttendees.contains(attendee)) {
+					events.add(event);
+          break;
+      	}
+    	}
     }
+    
+		return events;
+  }
 
-    private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
-        Collection<TimeRange> whens = getSmoothedTimeRangesFromEvents(events);
-        List<TimeRange> openMeetingSlots = new ArrayList<>();
-        openMeetingSlots.add(TimeRange.WHOLE_DAY);
+  private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
+  	Collection<TimeRange> whens = combineNestedAndOverlappingEventTimeRanges(events);
+   	List<TimeRange> openMeetingSlots = new ArrayList<>();
+    openMeetingSlots.add(TimeRange.WHOLE_DAY);
 
-        for (TimeRange when : whens) {
-            for (int index = 0; index < openMeetingSlots.size(); index++) {
-                TimeRange range = openMeetingSlots.get(index);
-                TimeRange secondHalf = null;
-                TimeRange firstHalf = null;
+    for (TimeRange when : whens) {
+      for (int index = 0; index < openMeetingSlots.size(); index++) {
+      	TimeRange range = openMeetingSlots.get(index);
+        TimeRange secondHalf = null;
+        TimeRange firstHalf = null;
 
-                if (range.contains(when)) {
-                    firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
-                    secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
-                    index = openMeetingSlots.indexOf(range);
-                }
-
-                if (firstHalf != null && secondHalf != null) {
-                    openMeetingSlots.remove(index);
-                    openMeetingSlots.add(index, secondHalf);
-                    openMeetingSlots.add(index, firstHalf);
-                }
-            }
+        if (range.contains(when)) {
+          firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
+          secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
         }
+
+        if (firstHalf != null && secondHalf != null) {
+        	openMeetingSlots.remove(index);
+          openMeetingSlots.add(index, secondHalf);
+          openMeetingSlots.add(index, firstHalf);
+        }
+      }
+    }
         
-        openMeetingSlots = removeOpenPointsAndTooSmallMeetingSlots(openMeetingSlots, duration);
+    openMeetingSlots = openMeetingSlots.stream().filter(meetingSlot -> meetingSlot.duration() >= duration).collect(Collectors.toList());
+    
+    return openMeetingSlots;
+  }
 
-        return openMeetingSlots;
+  private Collection<TimeRange> combineNestedAndOverlappingEventTimeRanges(Collection<Event> events) {
+  	ArrayList<TimeRange> rangesBuffer = new ArrayList<>();
+    boolean foundNestedOrOverlappingTimeRange = true;
+
+    for (Event event : events) {
+    	rangesBuffer.add(event.getWhen());
+		}
+
+    Collections.sort(rangesBuffer, TimeRange.ORDER_BY_START);
+
+    while (foundNestedOrOverlappingTimeRange) {
+			foundNestedOrOverlappingTimeRange = false;
+
+      for (int index = 0; index < rangesBuffer.size() - 1 && foundNestedOrOverlappingTimeRange == false; index++) {
+      	TimeRange next = rangesBuffer.get(index + 1);
+        TimeRange current = rangesBuffer.get(index);
+        foundNestedOrOverlappingTimeRange = true;
+
+      	if (current.contains(next)) {
+	      	rangesBuffer.remove(next);
+        } else if (next.contains(current)) {
+          rangesBuffer.remove(current);
+        } else if (current.overlaps(next)) {
+          TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
+          rangesBuffer.remove(index);
+          rangesBuffer.remove(index);
+          rangesBuffer.add(index, resolved);
+        } else {
+        	foundNestedOrOverlappingTimeRange = false;
+        }
+      }
     }
 
-    private Collection<TimeRange> getSmoothedTimeRangesFromEvents(Collection<Event> events) {
-        ArrayList<TimeRange> rangesBuffer = new ArrayList<>();
-        boolean flag = true;
-
-        for (Event event : events) {
-            rangesBuffer.add(event.getWhen());
-        }
-
-        while (flag) {
-            flag = false;
-
-            for (int index = 0; index < rangesBuffer.size() - 1 && flag == false; index++) {
-                TimeRange next = rangesBuffer.get(index + 1);
-                TimeRange current = rangesBuffer.get(index);
-                flag = true;
-
-                if (current.contains(next)) {
-                    rangesBuffer.remove(next);
-                } else if (next.contains(current)) {
-                    rangesBuffer.remove(current);
-                } else if (current.overlaps(next)) {
-                    TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
-                    rangesBuffer.remove(index);
-                    rangesBuffer.remove(index);
-                    rangesBuffer.add(index, resolved);
-                } else {
-                    flag = false;
-                }
-            }
-        }
-        
-        return rangesBuffer;
-    }
-
-    private List<TimeRange> removeOpenPointsAndTooSmallMeetingSlots(List<TimeRange> openMeetingSlots, long duration) {
-        List<TimeRange> meetingsBuffer = new ArrayList<>();
-
-        for (TimeRange meetingSlot : openMeetingSlots) {
-            if (meetingSlot.duration() >= duration) {
-                meetingsBuffer.add(meetingSlot);
-            }
-        }
-
-        return meetingsBuffer;
-    }
+    return rangesBuffer;
+  }
     
 }
