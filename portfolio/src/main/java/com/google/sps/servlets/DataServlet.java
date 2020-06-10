@@ -53,21 +53,18 @@ public class DataServlet extends HttpServlet {
 
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        int maxNumberOfComments = 20;
-        
         Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
         PreparedQuery results = datastore.prepare(query);
+        response.setContentType("application/json;");
 
-        int numberOfComments = 0;
+        int maxNumberOfComments = 20;
 
         if (request.getParameter("max-comments") != null) {
             String maxNumberOfCommentsString = request.getParameter("max-comments");
             maxNumberOfComments = Integer.parseInt(maxNumberOfCommentsString);
         }
-        
-        response.setContentType("application/json;");
 
-        List<Comment> comments = results.asList(FetchOptions.Builder.withLimit(maxNumberOfComments)).stream().map(Comment::fromDatastoreEntity).collect(Collectors.toList());
+        List<Comment> comments = results.asList(FetchOptions.Builder.withLimit(maxNumberOfComments)).stream().map(Comment::buildCommentFromDatastoreCommentEntity).collect(Collectors.toList());
         String json = convertToJSON(comments);
         response.getWriter().println(json);
     }
@@ -81,10 +78,8 @@ public class DataServlet extends HttpServlet {
         String email = userService.getCurrentUser().getEmail();
         String text = request.getParameter("comment-text");
         Instant time = Instant.now();
-
-        Comment comment = new Comment(email, text, time);
-        Entity commentEntity = comment.toDatastoreEntity();
-
+        
+        Entity commentEntity = Comment.createDatastoreCommentEntity(email, text, time);
         datastore.put(commentEntity);
 
         response.sendRedirect("/index.html");

@@ -4,11 +4,13 @@ import java.time.Instant;
 import com.google.appengine.api.datastore.Entity;
 
 /**
- *  Class representing a comment with the commenter's email,
- *  the comment's text, and the comment's time of creation.
+ *  <p>Class representing a comment with the commenter's email,
+ *  the comment's text, and the comment's time of creation.</p>
  *  
- *  This class also handles conversion
- *  to and from Datastore Entities.
+ *  <p>The id variable stores the Datastore Entity ID.</p>
+ *  
+ *  <p>This class also handles conversion
+ *  to and from Datastore Entities.</p>
  */
 
 public final class Comment {
@@ -16,45 +18,8 @@ public final class Comment {
     private String email;
     private String text;
     private Instant time;
-
-    public Comment(String email, String text, Instant time) {
-        this.text = text;
-        this.time = time;
-        this.email = email;
-    }
-
-    public Comment(long id, String email, String text, Instant time) {
-        this.id = id;
-        this.text = text;
-        this.time = time;
-        this.email = email;
-    }
-
-    public long getID() {
-        return this.id;
-    }
-
-    public String getEmail() {
-        return this.email;
-    }
-
-    public String getText() {
-        return this.text;
-    }
-
-    public void setText(String text) {
-        this.text = text;
-    }
-
-    public Instant getTime() {
-        return this.time;
-    }
-
-    public void setTime(Instant time) {
-        this.time = time;
-    }
-
-    public Entity toDatastoreEntity() {
+    
+    public static Entity createDatastoreCommentEntity(String email, String text, Instant time) {
         Entity commentEntity = new Entity("Comment");
         commentEntity.setProperty("email", email);
         commentEntity.setProperty("text", text);
@@ -62,14 +27,16 @@ public final class Comment {
         return commentEntity;
     }
     
-    public static Comment fromDatastoreEntity(Entity entity) {
+    public static Comment buildCommentFromDatastoreCommentEntity(Entity entity) {
         Instant time = Instant.parse((String) entity.getProperty("time"));
         String email = (String) entity.getProperty("email");
         String text = (String) entity.getProperty("text");
         long id = entity.getKey().getId();
-
-        Comment comment = new Comment(id, email, text, time);
-
+        Comment comment = new Comment();
+        comment.email = email;
+        comment.text = text;
+        comment.time = time;
+        comment.id = id;
         return comment;
     }
     
