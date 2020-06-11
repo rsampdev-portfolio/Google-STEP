@@ -98,93 +98,44 @@ function createListElement(text) {
   	return liElement;
 }
 
-var map;
-
 /**
  *  Initializes a map of Morehouse College with custom markers.
  */
  
 function initMap() {
-    const morehouseLocation = new google.maps.LatLng(33.747, -84.416);
-    const brazealHallLocation = new google.maps.LatLng(33.748856, -84.416192);
-    const techTowersLocation = new google.maps.LatLng(33.748400, -84.414113);
-    const brawleyHallLocation = new google.maps.LatLng(33.746881, -84.414399);
-    const leadershipCenterLocation = new google.maps.LatLng(33.744758, -84.414880);
-
     const mapOptions = {
-        center: morehouseLocation,
-        clickableIcons: true,
+        center: new google.maps.LatLng(33.747, -84.416),
         mapTypeControl: false,
+        clickableIcons: true,
         draggable: true,
         maxZoom: 20,
         zoom: 17,
     };
 
-    map = new google.maps.Map(document.getElementById('map'), mapOptions);
+    const map = new google.maps.Map(document.getElementById('map'), mapOptions);
     map.setMapTypeId('roadmap');
     map.setTilt(45);
+    
+    addMarkerToMap(map, "Tech Towers", new google.maps.LatLng(33.748400, -84.414113), "Tech Towers Info Window");
+    addMarkerToMap(map, "Brazeal Hall", new google.maps.LatLng(33.748856, -84.416192), "Brazeal Hall Info Window");
+    addMarkerToMap(map, "Brawley Hall", new google.maps.LatLng(33.746881, -84.414399), "Brawley Hall Info Window");
+    addMarkerToMap(map, "Leadership Center", new google.maps.LatLng(33.744758, -84.414880), "Leadership Center Info Window");
+}
 
-    const brazealHallMarker = new google.maps.Marker({
-        position: brazealHallLocation,
-        title: "Brazeal Hall",
+function addMarkerToMap(map, markerTitle, markerLocation, markerInfoWindowContent) {
+    const marker = new google.maps.Marker({
+        position: markerLocation,
+        title: markerTitle,
         map: map
     });
 
-    var brazealHallMarkerInfowindow = new google.maps.InfoWindow({
-        content: "Brazeal Hall Info Window"
+    const markerInfoWindow = new google.maps.InfoWindow({
+        content: markerInfoWindowContent
     });
 
-    brazealHallMarker.addListener('click', function() {
-        brazealHallMarkerInfowindow.open(map, brazealHallMarker);
-        map.setCenter(brazealHallMarker.getPosition());
-        map.setZoom(19);
-    });
-
-    const techTowersMarker = new google.maps.Marker({
-        position: techTowersLocation,
-        title: "Tech Towers",
-        map: map
-    });
-
-    var techTowersMarkerInfowindow = new google.maps.InfoWindow({
-        content: "Tech Towers Info Window"
-    });
-
-    techTowersMarker.addListener('click', function() {
-        techTowersMarkerInfowindow.open(map, techTowersMarker);
-        map.setCenter(techTowersMarker.getPosition());
-        map.setZoom(19);
-    });
-
-    const brawleyHallMarker = new google.maps.Marker({
-        position: brawleyHallLocation,
-        title: "Brawley Hall",
-        map: map
-    });
-
-    var brawleyHallMarkerInfowindow = new google.maps.InfoWindow({
-        content: "Brawley Hall Info Window"
-    });
-
-    brawleyHallMarker.addListener('click', function() {
-        brawleyHallMarkerInfowindow.open(map, brawleyHallMarker);
-        map.setCenter(brawleyHallMarker.getPosition());
-        map.setZoom(19);
-    });
-
-    const leadershipCenterMarker = new google.maps.Marker({
-        position: leadershipCenterLocation,
-        title: "Leadership Center",
-        map: map
-    });
-
-    var leadershipCenterMarkerInfowindow = new google.maps.InfoWindow({
-        content: "Leadership Center Info Window"
-    });
-
-    leadershipCenterMarker.addListener('click', function() {
-        leadershipCenterMarkerInfowindow.open(map, leadershipCenterMarker);
-        map.setCenter(leadershipCenterMarker.getPosition());
+    marker.addListener('click', function() {
+        markerInfoWindow.open(map, marker);
+        map.setCenter(marker.getPosition());
         map.setZoom(19);
     });
 }
