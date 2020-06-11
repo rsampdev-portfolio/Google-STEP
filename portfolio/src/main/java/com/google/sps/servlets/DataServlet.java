@@ -42,7 +42,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
  */
 
 @WebServlet("/data")
-public class DataServlet extends HttpServlet {
+public final class DataServlet extends HttpServlet {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
     private final UserService userService = UserServiceFactory.getUserService();

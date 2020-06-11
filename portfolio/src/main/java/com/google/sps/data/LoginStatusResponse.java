@@ -3,24 +3,25 @@ package com.google.sps.data;
 import com.google.appengine.api.datastore.Entity;
 
 /**
- *  Class that is a  wrapper around a login status,
- *  a possible user email, and either a link to login
- *  or a link to logout. 
+ *  Wrapper around a login status, a user email, and
+ *  either a link to login or a link to logout. 
  */
 
 public class LoginStatusResponse {
     private boolean isLoggedIn;
-    private String email;
-    private String link;
+    private String userEmail;
+    private String loginLink;
+    private String logoutLink;
 
-    public LoginStatusResponse(boolean isLoggedIn, String email, String link) {
+    public LoginStatusResponse(boolean isLoggedIn, String userEmail, String loginLink, String logoutLink) {
         this.isLoggedIn = isLoggedIn;
-        this.email = email;
-        this.link = link;
+        this.userEmail = userEmail;
+        this.loginLink = loginLink;
+        this.logoutLink = logoutLink;
     }
 
     @Override
     public String toString() {
-        return "LoginResponse [is-logged-in=" + isLoggedIn + ", email=" + email + ", link=" + link + "]";
+        return "LoginResponse [is-logged-in=" + isLoggedIn + ", userEmail=" + userEmail + ", loginLink=" + loginLink + ", logoutLink=" + logoutLink +"]";
     }
 }

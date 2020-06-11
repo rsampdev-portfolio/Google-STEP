@@ -17,9 +17,9 @@ import com.google.appengine.api.users.UserServiceFactory;
  */
 
 @WebServlet("/check-login")
-public class CheckLoginServlet extends HttpServlet {
+public final class CheckLoginServlet extends HttpServlet {
 
-    private UserService userService = UserServiceFactory.getUserService();
+    private final UserService userService = UserServiceFactory.getUserService();
 
     /**
      *  Returns a LoginStatusResponse object in JSON format.
@@ -28,24 +28,25 @@ public class CheckLoginServlet extends HttpServlet {
     @Override
     public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         boolean isLoggedIn = false;
-        String email = "";
-        String link;
+        String userEmail = "";
+        String loginLink = "";
+        String logoutLink = ""; 
 
         if (userService.isUserLoggedIn()) {
             String urlToRedirectToAfterUserLogsOut = "/";
             String logoutUrl = userService.createLogoutURL(urlToRedirectToAfterUserLogsOut);
-            email = userService.getCurrentUser().getEmail();
+            userEmail = userService.getCurrentUser().getEmail();
             isLoggedIn = true;
-            link = logoutUrl;
+            loginLink = logoutUrl;
         } else {
             String urlToRedirectToAfterUserLogsIn = "/";
             String loginUrl = userService.createLoginURL(urlToRedirectToAfterUserLogsIn);
-            link = loginUrl;
+            logoutLink = loginUrl;
         }
 
         response.setContentType("application/json");
 
-        LoginStatusResponse loginStatusResponse = new LoginStatusResponse(isLoggedIn, email, link);
+        LoginStatusResponse loginStatusResponse = new LoginStatusResponse(isLoggedIn, userEmail, loginLink, logoutLink);
         String json = convertToJSON(loginStatusResponse);
         response.getWriter().println(json);
     }

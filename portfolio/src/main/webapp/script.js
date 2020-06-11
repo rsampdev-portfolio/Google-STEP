@@ -75,19 +75,16 @@ async function showCommentsForm() {
     const servletURL = "/check-login";
     const loginStatusResponseObject = await fetch(servletURL);
     const loginStatusResponse = await loginStatusResponseObject.json();
-
-    const isLoggedIn = loginStatusResponse.isLoggedIn;
-    const email = loginStatusResponse.email;
-    const link = loginStatusResponse.link;
+    const {isLoggedIn, userEmail, loginLink, logoutLink} = loginStatusResponse;
 
     if (isLoggedIn) {
-        userEmailHolder.innerText = email;
+        userEmailHolder.innerText = userEmail;
         notLoggedInDiv.hidden = true;
         commentsForm.hidden = false;
         loggedInDiv.hidden = false;
-        loggedInLink.href = link;
+        loggedInLink.href = loginLink;
     } else {
-        notLoggedInLink.href = link;
+        notLoggedInLink.href = logoutLink;
     }
 }
 

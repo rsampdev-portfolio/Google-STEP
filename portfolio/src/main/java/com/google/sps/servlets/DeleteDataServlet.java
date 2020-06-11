@@ -18,7 +18,7 @@ import com.google.appengine.api.datastore.DatastoreServiceFactory;
  */
 
 @WebServlet("/delete-data")
-public class DeleteDataServlet extends HttpServlet {
+public final class DeleteDataServlet extends HttpServlet {
 
     private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
 
