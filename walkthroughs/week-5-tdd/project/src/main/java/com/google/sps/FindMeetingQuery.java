@@ -36,15 +36,15 @@ public final class FindMeetingQuery {
     if (durationIsOutOfBounds) {
       return Collections.emptyList();
     } else if (primaryAttendees.isEmpty()) {
-			openMeetingSlots = List.of(TimeRange.WHOLE_DAY);
+      openMeetingSlots = List.of(TimeRange.WHOLE_DAY);
     }
 
     if (!optionalAttendees.isEmpty()) {
-    	Collection<String> allAttendees = new HashSet<>();
+    	Set<String> allAttendees = new HashSet<>();
     	allAttendees.addAll(primaryAttendees);
       allAttendees.addAll(optionalAttendees);
 
-      Collection<Event> tempEvents = removeIrrelevantEvents(events, allAttendees);
+      List<Event> tempEvents = removeIrrelevantEvents(events, allAttendees);
       openMeetingSlots = getOpenMeetingSlots(tempEvents, duration);            
 		}
 
@@ -60,8 +60,8 @@ public final class FindMeetingQuery {
     return openMeetingSlots;
   }
     
-  private Collection<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
-    Collection<Event> events = new ArrayList<>();
+  private List<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
+    List<Event> events = new ArrayList<>();
 
     for (Event event : eventsCollection) {
     	Set<String> eventAttendees = event.getAttendees();
@@ -78,7 +78,7 @@ public final class FindMeetingQuery {
   }
 
   private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
-  	Collection<TimeRange> whens = combineNestedAndOverlappingEventTimeRanges(events);
+  	List<TimeRange> whens = combineNestedAndOverlappingEventTimeRanges(events);
    	List<TimeRange> openMeetingSlots = new ArrayList<>();
     openMeetingSlots.add(TimeRange.WHOLE_DAY);
 
@@ -100,14 +100,14 @@ public final class FindMeetingQuery {
         }
       }
     }
-        
-    openMeetingSlots = openMeetingSlots.stream().filter(meetingSlot -> meetingSlot.duration() >= duration).collect(Collectors.toList());
     
+    openMeetingSlots = openMeetingSlots.stream().filter(meetingSlot -> meetingSlot.duration() >= duration).collect(Collectors.toList());
+
     return openMeetingSlots;
   }
 
-  private Collection<TimeRange> combineNestedAndOverlappingEventTimeRanges(Collection<Event> events) {
-  	ArrayList<TimeRange> rangesBuffer = new ArrayList<>();
+  private List<TimeRange> combineNestedAndOverlappingEventTimeRanges(Collection<Event> events) {
+  	List<TimeRange> rangesBuffer = new ArrayList<>();
     boolean foundNestedOrOverlappingTimeRange = true;
 
     for (Event event : events) {
