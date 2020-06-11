@@ -14,18 +14,24 @@
 
 package com.google.sps;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public final class GreeterTest {
 
+	private Greeter greeter;
+
+	@Before
+  	public void setUp() {
+		greeter = new Greeter();
+  	}
+
     @Test
     public void greet_withOnlyAlphabeticCharacters_prependHelloWithNoSpecialCharacterRemovalOrSpaceTrimming() {
-        Greeter greeter = new Greeter();
-
         String greeting = greeter.greet("Ada");
 
         Assert.assertEquals("Hello Ada", greeting);
@@ -33,21 +39,15 @@ public final class GreeterTest {
 
     @Test
     public void greet_withAlphabeticCharactersAndExtraSpaceOnTheEnds_prependHelloWithSpaceTrimming() {
-        Greeter greeter = new Greeter();
-
         String greeting = greeter.greet("   Ada   ");
 
-        // Whitespace should be trimmed
         Assert.assertEquals("Hello Ada", greeting);
     }
 
     @Test
     public void greet_withBothAlphabeticAndSpecialCharacters_prependHelloWithSpecialCharacterRemoval() {
-        Greeter greeter = new Greeter();
-
         String greeting = greeter.greet("Sampson/*!@#$%^&*()\"{}_[]|\\?/<>,.");
 
-        // Special characters should be removed
         Assert.assertEquals("Hello Sampson", greeting);
     }
 }
