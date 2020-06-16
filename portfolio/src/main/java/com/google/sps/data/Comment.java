@@ -14,10 +14,17 @@ import com.google.appengine.api.datastore.Entity;
  */
 
 public final class Comment {
-    private long id = 0L;
-    private String email;
-    private String text;
-    private Instant time;
+    private final long id ;
+    private final String email;
+    private final String text;
+    private final Instant time;
+    
+    private Comment(long id, String email, String text, Instant time) {
+        this.email = email;
+        this.text = text;
+        this.time = time;
+        this.id = id;
+    }
     
     public static Entity createDatastoreCommentEntity(String email, String text, Instant time) {
         Entity commentEntity = new Entity("Comment");
@@ -32,12 +39,7 @@ public final class Comment {
         String email = (String) entity.getProperty("email");
         String text = (String) entity.getProperty("text");
         long id = entity.getKey().getId();
-        Comment comment = new Comment();
-        comment.email = email;
-        comment.text = text;
-        comment.time = time;
-        comment.id = id;
-        return comment;
+        return new Comment(id, email, text, time);
     }
     
     @Override
