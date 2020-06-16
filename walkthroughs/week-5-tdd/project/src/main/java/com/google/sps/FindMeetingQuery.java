@@ -24,122 +24,122 @@ import java.util.Collections;
 import java.util.stream.Collectors;
 
 public final class FindMeetingQuery {
-    
-  public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
-    Collection<String> optionalAttendees = request.getOptionalAttendees();
-    Collection<String> primaryAttendees = request.getAttendees();
-    List<TimeRange> openMeetingSlots = new ArrayList<>();
-    long duration = request.getDuration();
-
-    boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
-
-    if (durationIsOutOfBounds) {
-      return Collections.emptyList();
-    } else if (primaryAttendees.isEmpty()) {
-      openMeetingSlots = List.of(TimeRange.WHOLE_DAY);
-    }
-
-    if (!optionalAttendees.isEmpty()) {
-    	Set<String> allAttendees = new HashSet<>();
-    	allAttendees.addAll(primaryAttendees);
-      allAttendees.addAll(optionalAttendees);
-
-      List<Event> tempEvents = removeIrrelevantEvents(events, allAttendees);
-      openMeetingSlots = getOpenMeetingSlots(tempEvents, duration);            
+	
+	public Collection<TimeRange> query(Collection<Event> events, MeetingRequest request) {
+		Collection<String> optionalAttendees = request.getOptionalAttendees();
+		Collection<String> primaryAttendees = request.getAttendees();
+		List<TimeRange> openMeetingSlots = new ArrayList<>();
+		long duration = request.getDuration();
+		
+		boolean durationIsOutOfBounds = duration < 0 || duration > TimeRange.WHOLE_DAY.duration();
+		
+		if (durationIsOutOfBounds) {
+			return Collections.emptyList();
+		} else if (primaryAttendees.isEmpty()) {
+			openMeetingSlots = List.of(TimeRange.WHOLE_DAY);
 		}
-
-    if (openMeetingSlots.isEmpty()) {
-    	if (primaryAttendees.isEmpty()) {
+		
+		if (!optionalAttendees.isEmpty()) {
+			Set<String> allAttendees = new HashSet<>();
+			allAttendees.addAll(primaryAttendees);
+			allAttendees.addAll(optionalAttendees);
+			
+			List<Event> tempEvents = removeIrrelevantEvents(events, allAttendees);
+			openMeetingSlots = getOpenMeetingSlots(tempEvents, duration);            
+		}
+		
+		if (openMeetingSlots.isEmpty()) {
+			if (primaryAttendees.isEmpty()) {
 				return Collections.emptyList();
-      } else {
-        events = removeIrrelevantEvents(events, primaryAttendees);
-        openMeetingSlots = getOpenMeetingSlots(events, duration);
-      }
-    }
-
-    return openMeetingSlots;
-  }
-    
-  private List<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
-    List<Event> events = new ArrayList<>();
-
-    for (Event event : eventsCollection) {
-    	Set<String> eventAttendees = event.getAttendees();
-            
-    	for (String attendee : attendees) {
-    		if (eventAttendees.contains(attendee)) {
-					events.add(event);
-          break;
-      	}
-    	}
-    }
-    
-		return events;
-  }
-
-  private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
-  	List<TimeRange> whens = combineNestedAndOverlappingEventTimeRanges(events);
-   	List<TimeRange> openMeetingSlots = new ArrayList<>();
-    openMeetingSlots.add(TimeRange.WHOLE_DAY);
-
-    for (TimeRange when : whens) {
-      for (int index = 0; index < openMeetingSlots.size(); index++) {
-      	TimeRange range = openMeetingSlots.get(index);
-        TimeRange secondHalf = null;
-        TimeRange firstHalf = null;
-
-        if (range.contains(when)) {
-          firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
-          secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
-        }
-
-        if (firstHalf != null && secondHalf != null) {
-        	openMeetingSlots.remove(index);
-          openMeetingSlots.add(index, secondHalf);
-          openMeetingSlots.add(index, firstHalf);
-        }
-      }
-    }
-    
-    openMeetingSlots = openMeetingSlots.stream().filter(meetingSlot -> meetingSlot.duration() >= duration).collect(Collectors.toList());
-
-    return openMeetingSlots;
-  }
-
-  private List<TimeRange> combineNestedAndOverlappingEventTimeRanges(Collection<Event> events) {
-  	List<TimeRange> rangesBuffer = new ArrayList<>();
-    boolean foundNestedOrOverlappingTimeRange = true;
-
-    for (Event event : events) {
-    	rangesBuffer.add(event.getWhen());
+			} else {
+				events = removeIrrelevantEvents(events, primaryAttendees);
+				openMeetingSlots = getOpenMeetingSlots(events, duration);
+			}
 		}
-
-    Collections.sort(rangesBuffer, TimeRange.ORDER_BY_START);
-
-    while (foundNestedOrOverlappingTimeRange) {
+		
+		return openMeetingSlots;
+	}
+	
+	private List<Event> removeIrrelevantEvents(Collection<Event> eventsCollection, Collection<String> attendees) {
+		List<Event> events = new ArrayList<>();
+		
+		for (Event event : eventsCollection) {
+			Set<String> eventAttendees = event.getAttendees();
+			
+			for (String attendee : attendees) {
+				if (eventAttendees.contains(attendee)) {
+					events.add(event);
+					break;
+				}
+			}
+		}
+		
+		return events;
+	}
+	
+	private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
+		List<TimeRange> whens = combineNestedAndOverlappingEventTimeRanges(events);
+		List<TimeRange> openMeetingSlots = new ArrayList<>();
+		openMeetingSlots.add(TimeRange.WHOLE_DAY);
+		
+		for (TimeRange when : whens) {
+			for (int index = 0; index < openMeetingSlots.size(); index++) {
+				TimeRange range = openMeetingSlots.get(index);
+				TimeRange secondHalf = null;
+				TimeRange firstHalf = null;
+				
+				if (range.contains(when)) {
+					firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
+					secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
+				}
+				
+				if (firstHalf != null && secondHalf != null) {
+					openMeetingSlots.remove(index);
+					openMeetingSlots.add(index, secondHalf);
+					openMeetingSlots.add(index, firstHalf);
+				}
+			}
+		}
+		
+		openMeetingSlots = openMeetingSlots.stream().filter(meetingSlot -> meetingSlot.duration() >= duration).collect(Collectors.toList());
+		
+		return openMeetingSlots;
+	}
+	
+	private List<TimeRange> combineNestedAndOverlappingEventTimeRanges(Collection<Event> events) {
+		List<TimeRange> rangesBuffer = new ArrayList<>();
+		boolean foundNestedOrOverlappingTimeRange = true;
+		
+		for (Event event : events) {
+			rangesBuffer.add(event.getWhen());
+		}
+		
+		Collections.sort(rangesBuffer, TimeRange.ORDER_BY_START);
+		
+		while (foundNestedOrOverlappingTimeRange) {
 			foundNestedOrOverlappingTimeRange = false;
+			
+			for (int index = 0; index < rangesBuffer.size() - 1 && foundNestedOrOverlappingTimeRange == false; index++) {
+				TimeRange next = rangesBuffer.get(index + 1);
+				TimeRange current = rangesBuffer.get(index);
+				foundNestedOrOverlappingTimeRange = true;
+				
+				if (current.contains(next)) {
+					rangesBuffer.remove(next);
+				} else if (next.contains(current)) {
+					rangesBuffer.remove(current);
+				} else if (current.overlaps(next)) {
+					TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
+					rangesBuffer.remove(index);
+					rangesBuffer.remove(index);
+					rangesBuffer.add(index, resolved);
+				} else {
+					foundNestedOrOverlappingTimeRange = false;
+				}
+			}
+		}
+		
+		return rangesBuffer;
+	}
 
-      for (int index = 0; index < rangesBuffer.size() - 1 && foundNestedOrOverlappingTimeRange == false; index++) {
-      	TimeRange next = rangesBuffer.get(index + 1);
-        TimeRange current = rangesBuffer.get(index);
-        foundNestedOrOverlappingTimeRange = true;
-
-      	if (current.contains(next)) {
-	      	rangesBuffer.remove(next);
-        } else if (next.contains(current)) {
-          rangesBuffer.remove(current);
-        } else if (current.overlaps(next)) {
-          TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
-          rangesBuffer.remove(index);
-          rangesBuffer.remove(index);
-          rangesBuffer.add(index, resolved);
-        } else {
-        	foundNestedOrOverlappingTimeRange = false;
-        }
-      }
-    }
-
-    return rangesBuffer;
-  }
-    
 }
