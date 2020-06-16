@@ -4,13 +4,13 @@ import java.time.Instant;
 import com.google.appengine.api.datastore.Entity;
 
 /**
- *  <p>Class representing a comment with the commenter's email,
- *  the comment's text, and the comment's time of creation.</p>
+ *  Class representing a comment with the commenter's email,
+ *  the comment's text, and the comment's time of creation.
  *  
- *  <p>The id variable stores the Datastore Entity ID.</p>
+ *  <p>The id variable stores the Datastore Entity ID.
  *  
  *  <p>This class also handles conversion
- *  to and from Datastore Entities.</p>
+ *  to and from Datastore Entities.
  */
 
 public final class Comment {
