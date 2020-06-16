@@ -91,9 +91,7 @@ public final class FindMeetingQuery {
 				if (range.contains(when)) {
 					firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
 					secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
-				}
-				
-				if (firstHalf != null && secondHalf != null) {
+
 					openMeetingSlots.remove(index);
 					openMeetingSlots.add(index, secondHalf);
 					openMeetingSlots.add(index, firstHalf);
@@ -108,7 +106,6 @@ public final class FindMeetingQuery {
 	
 	private List<TimeRange> combineNestedAndOverlappingEventTimeRanges(Collection<Event> events) {
 		List<TimeRange> rangesBuffer = new ArrayList<>();
-		boolean foundNestedOrOverlappingTimeRange = true;
 		
 		for (Event event : events) {
 			rangesBuffer.add(event.getWhen());
@@ -116,26 +113,19 @@ public final class FindMeetingQuery {
 		
 		Collections.sort(rangesBuffer, TimeRange.ORDER_BY_START);
 		
-		while (foundNestedOrOverlappingTimeRange) {
-			foundNestedOrOverlappingTimeRange = false;
-			
-			for (int index = 0; index < rangesBuffer.size() - 1 && foundNestedOrOverlappingTimeRange == false; index++) {
-				TimeRange next = rangesBuffer.get(index + 1);
-				TimeRange current = rangesBuffer.get(index);
-				foundNestedOrOverlappingTimeRange = true;
+		for (int index = 0; index < rangesBuffer.size() - 1; index++) {
+			TimeRange next = rangesBuffer.get(index + 1);
+			TimeRange current = rangesBuffer.get(index);
 				
-				if (current.contains(next)) {
-					rangesBuffer.remove(next);
-				} else if (next.contains(current)) {
-					rangesBuffer.remove(current);
-				} else if (current.overlaps(next)) {
-					TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
-					rangesBuffer.remove(index);
-					rangesBuffer.remove(index);
-					rangesBuffer.add(index, resolved);
-				} else {
-					foundNestedOrOverlappingTimeRange = false;
-				}
+			if (current.contains(next)) {
+				rangesBuffer.remove(next);
+			} else if (next.contains(current)) {
+				rangesBuffer.remove(current);
+			} else if (current.overlaps(next)) {
+				TimeRange resolved = TimeRange.fromStartEnd(current.start(), next.end(), false);
+				rangesBuffer.remove(index);
+				rangesBuffer.remove(index);
+				rangesBuffer.add(index, resolved);
 			}
 		}
 		
