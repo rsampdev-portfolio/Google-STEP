@@ -15,6 +15,7 @@
 package com.google.sps.servlets;
 
 import java.util.List;
+import java.time.Instant;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.google.gson.Gson;
@@ -25,53 +26,71 @@ import com.google.gson.reflect.TypeToken;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import com.google.appengine.api.datastore.Query;
+import com.google.appengine.api.datastore.Entity;
+import com.google.appengine.api.datastore.PreparedQuery;
+import com.google.appengine.api.datastore.DatastoreService;
+import com.google.appengine.api.datastore.Query.SortDirection;
+import com.google.appengine.api.datastore.DatastoreServiceFactory;
 
 /**
- *	Servlet that handles comment data.
+ *    Servlet that handles creating and also returning comment data.
  */
+
 @WebServlet("/data")
 public class DataServlet extends HttpServlet {
 
-	private ArrayList<Comment> comments = new ArrayList<Comment>();
+    private final DatastoreService datastore = DatastoreServiceFactory.getDatastoreService();
+    private int maxNumberOfComments = 20;
 
-	// comments.add("Wow! Your portfolio is super cool.");
-	// comments.add("Neat! I have six siblings as well.");
-	// comments.add("Awesome! We go to the same school.");
+    @Override
+    public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        List<Comment> comments = new ArrayList<>();
+        
+        Query query = new Query("Comment").addSort("time", SortDirection.DESCENDING);
+        PreparedQuery results = datastore.prepare(query);
 
-	@Override
-  	public void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String json = convertToJson(comments);
+        int numberOfComments = 0;
 
-    	response.setContentType("application/json;");
-    	response.getWriter().println(json);
-  	}
-
-	@Override
-	public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
-		String name = request.getParameter("comment-name");
-		String text = request.getParameter("comment-text");
-
-		addComment(name, text);
-
-		response.sendRedirect("/index.html");
-	}
-
-	public void addComment(String name, String text) {
-        int id = 0;
-
-        if (comments.size() > 0) {
-            id = comments.get(0).getID() + 1;
+        if (request.getParameter("max-comments") != null) {
+            String maxNumberOfCommentsString = request.getParameter("max-comments");
+            maxNumberOfComments = Integer.parseInt(maxNumberOfCommentsString);
         }
 
-        Comment comment = new Comment(id, name, text);
-        comments.add(0, comment);
+        for (Entity entity : results.asIterable()) {
+            Comment comment = Comment.fromDatastoreEntity(entity);
+
+            if (numberOfComments < maxNumberOfComments) {
+                comments.add(comment);
+                numberOfComments++;
+            }
+        }
+
+        String json = convertToJSON(comments);
+
+        response.setContentType("application/json;");
+        response.getWriter().println(json);
     }
 
-    private String convertToJson(ArrayList<Comment> comments) {
-        Gson gson = new Gson();
-		Type type = new TypeToken<List<Comment>>(){}.getType();
-    	String json = gson.toJson(comments, type);
-    	return json;
-  	}
+    @Override
+    public void doPost(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        String name = request.getParameter("comment-name");
+        String text = request.getParameter("comment-text");
+        Instant time = Instant.now();
 
+        Comment comment = new Comment(name, text, time);
+        Entity commentEntity = comment.toDatastoreEntity();
+
+        datastore.put(commentEntity);
+
+        response.sendRedirect("/index.html");
+    }
+
+    private String convertToJSON(List<Comment> comments) {
+        Gson gson = new Gson();
+        Type type = new TypeToken<List<Comment>>(){}.getType();
+        String json = gson.toJson(comments, type);
+        return json;
+    }
+    
 }
