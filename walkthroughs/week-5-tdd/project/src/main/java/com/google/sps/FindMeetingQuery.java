@@ -85,12 +85,10 @@ public final class FindMeetingQuery {
 		for (TimeRange when : whens) {
 			for (int index = 0; index < openMeetingSlots.size(); index++) {
 				TimeRange range = openMeetingSlots.get(index);
-				TimeRange secondHalf = null;
-				TimeRange firstHalf = null;
 				
 				if (range.contains(when)) {
-					firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
-					secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
+					TimeRange firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
+					TimeRange secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
 
 					openMeetingSlots.remove(index);
 					openMeetingSlots.add(index, secondHalf);
