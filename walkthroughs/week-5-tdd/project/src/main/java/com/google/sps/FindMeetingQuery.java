@@ -78,24 +78,30 @@ public final class FindMeetingQuery {
 	}
 	
 	private List<TimeRange> getOpenMeetingSlots(Collection<Event> events, long duration) {
-		List<TimeRange> whens = combineNestedAndOverlappingEventTimeRanges(events);
+		List<TimeRange> eventTimeRanges = combineNestedAndOverlappingEventTimeRanges(events);
 		List<TimeRange> openMeetingSlots = new ArrayList<>();
 		openMeetingSlots.add(TimeRange.WHOLE_DAY);
-		
-		for (TimeRange when : whens) {
-			for (int index = 0; index < openMeetingSlots.size(); index++) {
-				TimeRange range = openMeetingSlots.get(index);
-				
-				if (range.contains(when)) {
-					TimeRange firstHalf = TimeRange.fromStartEnd(range.start(), when.start(), false);
-					TimeRange secondHalf = TimeRange.fromStartEnd(when.end(), range.end(), false);
 
-					openMeetingSlots.remove(index);
-					openMeetingSlots.add(index, secondHalf);
-					openMeetingSlots.add(index, firstHalf);
-				}
-			}
-		}
+        int eventTimeRangeIndex = 0;
+        int openMeetingSlotIndex = 0;
+
+        while (eventTimeRangeIndex < eventTimeRanges.size() && openMeetingSlotIndex < openMeetingSlots.size()) {
+            TimeRange openMeetingSlot = openMeetingSlots.get(openMeetingSlotIndex);
+            TimeRange eventTimeRange = eventTimeRanges.get(eventTimeRangeIndex);
+
+            if (openMeetingSlot.contains(eventTimeRange)) {
+                TimeRange firstHalf = TimeRange.fromStartEnd(openMeetingSlot.start(), eventTimeRange.start(), false);
+				TimeRange secondHalf = TimeRange.fromStartEnd(eventTimeRange.end(), openMeetingSlot.end(), false);
+
+				openMeetingSlots.remove(openMeetingSlotIndex);
+				openMeetingSlots.add(openMeetingSlotIndex, secondHalf);
+				openMeetingSlots.add(openMeetingSlotIndex, firstHalf);
+
+                openMeetingSlotIndex++;
+            }
+
+            eventTimeRangeIndex++;
+        }
 		
 		openMeetingSlots = openMeetingSlots.stream().filter(meetingSlot -> meetingSlot.duration() >= duration).collect(Collectors.toList());
 		
@@ -126,6 +132,8 @@ public final class FindMeetingQuery {
 				rangesBuffer.add(index, resolved);
 			}
 		}
+
+        Collections.sort(rangesBuffer, TimeRange.ORDER_BY_START);
 		
 		return rangesBuffer;
 	}

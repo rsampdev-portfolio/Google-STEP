@@ -51,12 +51,7 @@ public final class FindMeetingQueryTest {
 	private static final int DURATION_1_HOUR = 60;
 	private static final int DURATION_2_HOUR = 120;
 	
-	private FindMeetingQuery query;
-	
-	@Before
-	public void setUp() {
-		query = new FindMeetingQuery();
-	}
+	private FindMeetingQuery query = new FindMeetingQuery();
 	
 	@Test
 	public void optionsForNoAttendees() {
