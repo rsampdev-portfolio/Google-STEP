@@ -14,20 +14,40 @@
 
 package com.google.sps;
 
-import org.junit.Assert;
 import org.junit.Test;
+import org.junit.Assert;
+import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.junit.runners.JUnit4;
 
 @RunWith(JUnit4.class)
 public final class GreeterTest {
 
-  @Test
-  public void testGreeting() {
-    Greeter greeter = new Greeter();
+	private Greeter greeter;
 
-    String greeting = greeter.greet("Ada");
+	@Before
+  	public void setUp() {
+		greeter = new Greeter();
+  	}
 
-    Assert.assertEquals("Hello Ada", greeting);
-  }
+    @Test
+    public void greet_withOnlyAlphabeticCharacters_prependHelloWithNoSpecialCharacterRemovalOrSpaceTrimming() {
+        String greeting = greeter.greet("Ada");
+
+        Assert.assertEquals("Hello Ada", greeting);
+    }
+
+    @Test
+    public void greet_withAlphabeticCharactersAndExtraSpaceOnTheEnds_prependHelloWithSpaceTrimming() {
+        String greeting = greeter.greet("   Ada   ");
+
+        Assert.assertEquals("Hello Ada", greeting);
+    }
+
+    @Test
+    public void greet_withBothAlphabeticAndSpecialCharacters_prependHelloWithSpecialCharacterRemoval() {
+        String greeting = greeter.greet("Sampson/*!@#$%^&*()\"{}_[]|\\?/<>,.");
+
+        Assert.assertEquals("Hello Sampson", greeting);
+    }
 }
